@@ -1,0 +1,135 @@
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .history-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .filters-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .history-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .table-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+        }
+    </style>
+
+    <div class="history-container">
+        <div class="section-row">
+            <div class="section-container">
+                <div class="results-panel">
+                    <h2><i class="fas fa-history"></i> Historial de Evaluaciones MCMI-III</h2>
+                    
+                    <!-- Filtros -->
+                    <div class="filters-section">
+                        <h3>Filtrar Resultados</h3>
+                        <div class="filter-grid">
+                            <div>
+                                <label for="filter-cedula">Cédula del Paciente</label>
+                                <input type="text" id="filter-cedula" placeholder="Buscar por cédula...">
+                            </div>
+                            <div>
+                                <label for="filter-name">Nombre del Paciente</label>
+                                <input type="text" id="filter-name" placeholder="Buscar por nombre...">
+                            </div>
+                            <div>
+                                <label for="filter-date-from">Fecha Desde</label>
+                                <input type="date" id="filter-date-from">
+                            </div>
+                            <div>
+                                <label for="filter-date-to">Fecha Hasta</label>
+                                <input type="date" id="filter-date-to">
+                            </div>
+                        </div>
+                        <div class="filter-actions">
+                            <button onclick="clearFilters()" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                            <button onclick="loadReports()" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabla de Resultados -->
+                    <div class="history-table">
+                        <div class="table-header">
+                            <h3 style="margin: 0; color: white;">Evaluaciones Realizadas</h3>
+                        </div>
+                        <div id="reports-container">
+                            <div class="loading">
+                                <i class="fas fa-spinner fa-spin"></i> Cargando historial...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

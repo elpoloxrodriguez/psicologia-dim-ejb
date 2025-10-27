@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación MCMI-III - Paciente</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .patient-header {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .patient-info h1 {
+            color: #2c3e50;
+            font-size: 1.4rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .patient-info p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            background: #5a6268;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 2rem;
+            border: 1px solid #e9ecef;
+        }
+
+        header h1 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        header h2 {
+            color: #3498db;
+            margin-bottom: 1rem;
+        }
+
+        .description {
+            color: #6c757d;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .instructions {
+            text-align: left;
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-left: 4px solid #3498db;
+        }
+
+        .instructions h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .instructions ul {
+            list-style-position: inside;
+            color: #495057;
+        }
+
+        .instructions li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        /* Estilos del cuestionario (usar los mismos que en tu instrumento original) */
+        .evaluation-container {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .section-row {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .section-container {
+            background: white;
+            border: 1px solid #e9ecef;
+            padding: 2rem;
+        }
+
+        .questions-panel h2 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 20px;
+            margin-bottom: 1rem;
+            position: relative;
+            border-radius: 0;
+        }
+
+        .progress-fill {
+            background: #3498db;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 0;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #495057;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .question {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+            border-radius: 0;
+        }
+
+        .question.answered {
+            border-left: 4px solid #28a745;
+            background: #f8fff9;
+        }
+
+        .question-text {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: white;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 0;
+        }
+
+        .option:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+        }
+
+        .option.selected {
+            border-color: #3498db;
+            background: #3498db;
+            color: white;
+        }
+
+        .option input[type="radio"] {
+            margin: 0;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .button-container button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+            border-radius: 0;
+        }
+
+        #validate-btn {
+            background: #17a2b8;
+            color: white;
+        }
+
+        #validate-btn:hover {
+            background: #138496;
+        }
+
+        #calculate-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        #calculate-btn:hover {
+            background: #218838;
+        }
+
+        #calculate-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        #clear-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        #clear-btn:hover {
+            background: #c82333;
+        }
+
+        .results-panel h2 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+
+        .validation-message {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0;
+        }
+
+        .validation-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .validation-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .instruction-text {
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        #chart-container {
+            display: none;
+            width: 100%;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 0;
+        }
+
+        .interpretation-section {
+            background: white;
+            padding: 2rem;
+            border: 1px solid #e9ecef;
+            margin-top: 2rem;
+        }
+
+        .interpretation-section h3 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .interpretation-table {
+            overflow-x: auto;
+        }
+
+        .interpretation-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .interpretation-table th,
+        .interpretation-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e9ecef;
+        }
+
+        .interpretation-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .elevated {
+            background: #f8d7da !important;
+        }
+
+        .prominent {
+            background: #fff3cd !important;
+        }
+
+        .present {
+            background: #d1ecf1 !important;
+        }
+
+        .low {
+            background: #d4edda !important;
+        }
+
+        .absent {
+            background: #f8f9fa !important;
+        }
+
+        footer {
+            background: white;
+            padding: 1.5rem;
+            border-top: 1px solid #e9ecef;
+            margin-top: 2rem;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .options {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .button-container {
+                flex-direction: column;
+            }
+
+            .patient-header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header del paciente -->
+    <div class="patient-header">
+        <div class="patient-info">
+            <h1>Evaluación MCMI-III</h1>
+            <p id="patientWelcome">Paciente: Cargando...</p>
+        </div>
+        <button class="logout-btn" onclick="logoutPatient()">
+            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+        </button>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Evaluación Psicológica del Ejército Bolivariano</h1>
+            <h2>(MCMI-III)</h2>
+            <p class="description">
+                Este inventario evalúa patrones de personalidad y síndromes clínicos. 
+                Responda con sinceridad marcando VERDADERO o FALSO para cada afirmación según se aplique a usted.
+            </p>
+            <div class="instructions">
+                <h3>Instrucciones:</h3>
+                <ul>
+                    <li>Lea cada afirmación cuidadosamente</li>
+                    <li>Marque VERDADERO si la afirmación se aplica a usted</li>
+                    <li>Marque FALSO si la afirmación NO se aplica a usted</li>
+                    <li>Responda todas las 175 preguntas</li>
+                    <li>Sea honesto en sus respuestas para obtener resultados precisos</li>
+                </ul>
+            </div>
+        </header>
+
+        <div class="evaluation-container">
+            <div class="section-row">
+                <div class="section-container">
+                    <div class="questions-panel">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                            <span class="progress-text" id="progress-text">0 / 175 respondidas</span>
+                        </div>
+                        
+                        <h2>Cuestionario (175 preguntas)</h2>
+                        <div id="questions-container">
+                            <!-- Las preguntas se generarán con JavaScript -->
+                        </div>
+                        
+                        <div class="button-container">
+                            <button id="validate-btn">Validar Respuestas</button>
+                            <button id="calculate-btn" disabled>Calcular Resultados</button>
+                            <button id="clear-btn">Limpiar Respuestas</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-row">
+                <div class="section-container">
+                    <div class="results-panel">
+                        <h2>Resultados del MCMI-III</h2>
+                        <div id="validation-message"></div>
+                        <div id="results-container">
+                            <p class="instruction-text">
+                                Complete las 175 preguntas y haga clic en "Validar Respuestas" 
+                                para verificar que todas estén respondidas, luego "Calcular Resultados"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenedor del gráfico -->
+        <div id="chart-container">
+            <h3 style="text-align: center; color: #2c3e50; margin-bottom: 20px;">Perfil de Resultados Gráfico</h3>
+            <canvas id="resultsChart"></canvas>
+        </div>
+
+        <!-- Tabla de interpretación -->
+        <div class="interpretation-section">
+            <h3>Interpretación de Puntuaciones Base (BR)</h3>
+            <div class="interpretation-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Rango BR</th>
+                            <th>Interpretación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="elevated">
+                            <td><strong>Indicador Elevado</strong></td>
+                            <td>85 - 100</td>
+                            <td>Presencia muy probable del rasgo o síndrome</td>
+                        </tr>
+                        <tr class="prominent">
+                            <td><strong>Indicador Prominente</strong></td>
+                            <td>75 - 84</td>
+                            <td>Presencia probable del rasgo o síndrome</td>
+                        </tr>
+                        <tr class="present">
+                            <td><strong>Indicador Presente</strong></td>
+                            <td>60 - 74</td>
+                            <td>Presencia de rasgos o síntomas del síndrome</td>
+                        </tr>
+                        <tr class="low">
+                            <td><strong>Indicador Bajo</strong></td>
+                            <td>35 - 59</td>
+                            <td>Pocos rasgos o síntomas presentes</td>
+                        </tr>
+                        <tr class="absent">
+                            <td><strong>Indicador Ausente</strong></td>
+                            <td>0 - 34</td>
+                            <td>Ausencia del rasgo o síndrome</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer>
+            <p>
+                <strong>Nota importante:</strong> Este es un instrumento de evaluación psicológica que debe ser 
+                administrado e interpretado por profesionales de la salud mental calificados.
+            </p>
+        </footer>
+        
+    </div>
+
+    <!-- Incluir Font Awesome para íconos -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    
+    <!-- Incluir el JavaScript del instrumento MCMI-III -->
+    <script src="js/instrumento-mcmi.js"></script>
+    
+    <script>
+        // Función para cerrar sesión del paciente
+        async function logoutPatient() {
+            try {
+                const response = await fetch('php/logout-paciente.php');
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.href = 'login.html';
+                }
+            } catch (error) {
+                console.error('Error cerrando sesión:', error);
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Verificar sesión del paciente y cargar información
+        document.addEventListener('DOMContentLoaded', function() {
+            checkPatientSession();
+        });
+
+        async function checkPatientSession() {
+            try {
+                const response = await fetch('php/check-patient-session.php');
+                const data = await response.json();
+                
+                if (data.logged_in) {
+                    // Actualizar la información del paciente
+                    const patientWelcome = document.getElementById('patientWelcome');
+                    if (patientWelcome && data.patient) {
+                        patientWelcome.textContent = `Paciente: ${data.patient.name} (Cédula: ${data.patient.cedula})`;
+                    }
+                } else {
+                    // Redirigir al login si no hay sesión
+                    window.location.href = 'login.html';
+                }
+            } catch (error) {
+                console.error('Error verificando sesión:', error);
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>

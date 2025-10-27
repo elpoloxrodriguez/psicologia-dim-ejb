@@ -1,0 +1,485 @@
+<div class="patients-container">
+    <div class="patients-header">
+        <h1><i class="fas fa-user-injured"></i> Gestión de Pacientes</h1>
+        <button class="btn-primary" id="newPatientBtn">
+            <i class="fas fa-plus"></i> Nuevo Paciente
+        </button>
+    </div>
+
+    <div class="patients-toolbar">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Buscar por cédula, nombres, apellidos..." onkeyup="searchPatients()">
+            <i class="fas fa-search"></i>
+        </div>
+        <div class="filters">
+            <select id="statusFilter" onchange="filterPatients()">
+                <option value="all">Todos los estados</option>
+                <option value="active">Activos</option>
+                <option value="inactive">Inactivos</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="messageContainer"></div>
+
+    <div class="patients-table-container">
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner fa-spin"></i> Cargando pacientes...
+        </div>
+        <table id="patientsTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Cédula</th>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Edad</th>
+                    <th>Género</th>
+                    <th>Teléfono</th>
+                    <th>Estado</th>
+                    <th>Fecha Registro</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="patientsTableBody">
+                <!-- Los pacientes se cargarán aquí dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para agregar/editar paciente -->
+<div id="patientModal" class="modal">
+    <div class="modal-content large-modal">
+        <div class="modal-header">
+            <h2 id="modalTitle">Nuevo Paciente</h2>
+            <button class="close" onclick="closePatientModal()">&times;</button>
+        </div>
+        <form id="patientForm">
+            <input type="hidden" id="patientId">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cedula">Cédula *</label>
+                    <input type="text" id="cedula" name="cedula" required maxlength="30">
+                </div>
+
+                <div class="form-group">
+                    <label for="fecha_nacimiento">Fecha de Nacimiento *</label>
+                    <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nombres">Nombres *</label>
+                    <input type="text" id="nombres" name="nombres" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="apellidos">Apellidos *</label>
+                    <input type="text" id="apellidos" name="apellidos" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="genero">Género *</label>
+                    <select id="genero" name="genero" required>
+                        <option value="">Seleccionar género</option>
+                        <option value="masculino">Masculino</option>
+                        <option value="femenino">Femenino</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="estado_civil">Estado Civil</label>
+                    <select id="estado_civil" name="estado_civil">
+                        <option value="">Seleccionar</option>
+                        <option value="soltero">Soltero</option>
+                        <option value="casado">Casado</option>
+                        <option value="divorciado">Divorciado</option>
+                        <option value="viudo">Viudo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" name="telefono" maxlength="20">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="direccion">Dirección</label>
+                <textarea id="direccion" name="direccion" rows="2"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ciudad">Ciudad</label>
+                    <input type="text" id="ciudad" name="ciudad">
+                </div>
+
+                <div class="form-group">
+                    <label for="ocupacion">Ocupación</label>
+                    <input type="text" id="ocupacion" name="ocupacion">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="educacion">Nivel Educativo</label>
+                    <select id="educacion" name="educacion">
+                        <option value="">Seleccionar</option>
+                        <option value="primaria">Primaria</option>
+                        <option value="secundaria">Secundaria</option>
+                        <option value="tecnico">Técnico</option>
+                        <option value="universitario">Universitario</option>
+                        <option value="postgrado">Postgrado</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="is_active">Estado</label>
+                    <select id="is_active" name="is_active">
+                        <option value="true">Activo</option>
+                        <option value="false">Inactivo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="referencia">Referencia/Como se enteró</label>
+                <textarea id="referencia" name="referencia" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="motivo_consulta">Motivo de Consulta</label>
+                <textarea id="motivo_consulta" name="motivo_consulta" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="antecedentes">Antecedentes Relevantes</label>
+                <textarea id="antecedentes" name="antecedentes" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="observaciones">Observaciones</label>
+                <textarea id="observaciones" name="observaciones" rows="2"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" onclick="closePatientModal()">Cancelar</button>
+                <button type="submit" class="btn-primary">Guardar Paciente</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .patients-container {
+        padding: 0;
+    }
+
+    .patients-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .patients-header h1 {
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .patients-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        background: white;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .search-box {
+        position: relative;
+        width: 400px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 1px solid #ced4da;
+        border-radius: 25px;
+        font-size: 0.9rem;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+
+    .filters select {
+        padding: 0.5rem;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        background: white;
+    }
+
+    .patients-table-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    tr:hover {
+        background: #f8f9fa;
+    }
+
+    .status-active {
+        color: #28a745;
+        font-weight: 600;
+    }
+
+    .status-inactive {
+        color: #dc3545;
+        font-weight: 600;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-edit, .btn-delete, .btn-view {
+        padding: 0.5rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .btn-edit {
+        background: #f39c12;
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background: #e67e22;
+    }
+
+    .btn-delete {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #c0392b;
+    }
+
+    .btn-view {
+        background: #3498db;
+        color: white;
+    }
+
+    .btn-view:hover {
+        background: #2980b9;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+        background: white;
+        margin: 2% auto;
+        padding: 2rem;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .large-modal {
+        max-width: 800px;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 1rem;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        color: #2c3e50;
+    }
+
+    .close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #6c757d;
+    }
+
+    .close:hover {
+        color: #495057;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-row .form-group {
+        flex: 1;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        font-size: 1rem;
+        font-family: inherit;
+    }
+
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+        border-top: 1px solid #e9ecef;
+        padding-top: 1.5rem;
+    }
+
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-cancel:hover {
+        background: #5a6268;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+
+    .error-message {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 0.75rem;
+        border-radius: 5px;
+        margin-bottom: 1rem;
+        border: 1px solid #f5c6cb;
+    }
+
+    .success-message {
+        background: #d4edda;
+        color: #155724;
+        padding: 0.75rem;
+        border-radius: 5px;
+        margin-bottom: 1rem;
+        border: 1px solid #c3e6cb;
+    }
+</style>
+
+<script>
+    // Esperar a que el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+        // Asignar el evento al botón después de que se cargue el contenido
+        const newPatientBtn = document.getElementById('newPatientBtn');
+        if (newPatientBtn) {
+            newPatientBtn.addEventListener('click', function() {
+                if (typeof openPatientModal === 'function') {
+                    openPatientModal();
+                } else {
+                    console.error('openPatientModal no está definida');
+                    // Recargar el script de pacientes si es necesario
+                    if (window.patientsScriptLoaded && typeof loadPatients === 'function') {
+                        loadPatients();
+                        setTimeout(() => {
+                            if (typeof openPatientModal === 'function') {
+                                openPatientModal();
+                            }
+                        }, 100);
+                    }
+                }
+            });
+        }
+    });
+</script>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario Clínico Multiaxial de Millon III (MCMI-III)</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Evaluación Psicológica del Ejército Bolivariano</h1>
+            <h2>(MCMI-III)</h2>
+            <p class="description">
+                Este inventario evalúa patrones de personalidad y síndromes clínicos. 
+                Responda con sinceridad marcando VERDADERO o FALSO para cada afirmación según se aplique a usted.
+            </p>
+            <div class="instructions">
+                <h3>Instrucciones:</h3>
+                <ul>
+                    <li>Lea cada afirmación cuidadosamente</li>
+                    <li>Marque VERDADERO si la afirmación se aplica a usted</li>
+                    <li>Marque FALSO si la afirmación NO se aplica a usted</li>
+                    <li>Responda todas las 175 preguntas</li>
+                    <li>Sea honesto en sus respuestas para obtener resultados precisos</li>
+                </ul>
+            </div>
+        </header>
+
+        <div class="evaluation-container">
+            <div class="section-row">
+                <div class="section-container">
+                    <div class="questions-panel">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                            <span class="progress-text" id="progress-text">0 / 175 respondidas</span>
+                        </div>
+                        
+                        <h2>Cuestionario (175 preguntas)</h2>
+                        <div id="questions-container">
+                            <!-- Las preguntas se generarán con JavaScript -->
+                        </div>
+                        
+                        <div class="button-container">
+                            <button id="validate-btn">Validar Respuestas</button>
+                            <button id="calculate-btn" disabled>Calcular Resultados</button>
+                            <button id="clear-btn">Limpiar Respuestas</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-row">
+                <div class="section-container">
+                    <div class="results-panel">
+                        <h2>Resultados del MCMI-III</h2>
+                        <div id="validation-message"></div>
+                        <div id="results-container">
+                            <p class="instruction-text">
+                                Complete las 175 preguntas y haga clic en "Validar Respuestas" 
+                                para verificar que todas estén respondidas, luego "Calcular Resultados"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+                    <!-- Contenedor del gráfico colocado fuera de cualquier elemento que pueda afectar su visualización -->
+    <div id="chart-container" style="display: none; width: 1400px; margin: 20px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <h3 style="text-align: center; color: #2c3e50; margin-bottom: 20px;">Perfil de Resultados Gráfico</h3>
+        <canvas id="resultsChart" style="width: 100% !important; height: 500px !important;"></canvas>
+    </div>
+
+        <!-- Tabla de interpretación -->
+        <div class="interpretation-section">
+            <h3>Interpretación de Puntuaciones Base (BR)</h3>
+            <div class="interpretation-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Rango BR</th>
+                            <th>Interpretación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="elevated">
+                            <td><strong>Indicador Elevado</strong></td>
+                            <td>85 - 100</td>
+                            <td>Presencia muy probable del rasgo o síndrome</td>
+                        </tr>
+                        <tr class="prominent">
+                            <td><strong>Indicador Prominente</strong></td>
+                            <td>75 - 84</td>
+                            <td>Presencia probable del rasgo o síndrome</td>
+                        </tr>
+                        <tr class="present">
+                            <td><strong>Indicador Presente</strong></td>
+                            <td>60 - 74</td>
+                            <td>Presencia de rasgos o síntomas del síndrome</td>
+                        </tr>
+                        <tr class="low">
+                            <td><strong>Indicador Bajo</strong></td>
+                            <td>35 - 59</td>
+                            <td>Pocos rasgos o síntomas presentes</td>
+                        </tr>
+                        <tr class="absent">
+                            <td><strong>Indicador Ausente</strong></td>
+                            <td>0 - 34</td>
+                            <td>Ausencia del rasgo o síndrome</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+
+
+        <footer>
+            <p>
+                <strong>Nota importante:</strong> Este es un instrumento de evaluación psicológica que debe ser 
+                administrado e interpretado por profesionales de la salud mental calificados.
+            </p>
+        </footer>
+    </div>
+
+
+
+    <script src="./js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="./js/session-manager.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar sesión y redirigir si no está logueado
+            SessionManager.redirectIfNotLoggedIn();
+            
+            // Mostrar información del usuario
+            SessionManager.checkSession().then(data => {
+                if (data.logged_in) {
+                    document.getElementById('usernameDisplay').textContent = data.user.username;
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
