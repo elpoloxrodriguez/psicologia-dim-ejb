@@ -1006,27 +1006,27 @@ function showGeneralInterpretation(results) {
         //     alert(`Interpretación Principal:\n\nLas escalas más elevadas son: ${scaleNames}\nPuntuación BR más alta: ${maxBR}\nCategoría: ${category}\n\nNota: Esta interpretación es preliminar. Se recomienda consultar con un profesional de la salud mental calificado para una evaluación completa.`);
         // }, 500);
         let timerInterval;
-        Swal.fire({
-            title: "Interpretación Principal!",
-            html: `Las escalas más elevadas son: <br></br>\n${scaleNames}<br></br>\n Puntuación BR más alta: ${maxBR}\n  <br></br> Categoría: ${category}\n\n <br></br>Nota: Esta interpretación es preliminar. Se recomienda consultar con un profesional de la salud mental calificado para una evaluación completa.`,
-            timer: 10000,
-            timerProgressBar: false,
-            didOpen: () => {
-                Swal.showLoading();
-                const timer = Swal.getPopup().querySelector("b");
-                timerInterval = setInterval(() => {
-                    timer.textContent = `${Swal.getTimerLeft()}`;
-                }, 100);
-            },
-            willClose: () => {
-                clearInterval(timerInterval);
-            }
-        }).then((result) => {
-            /* Read more about handling dismissals below */
-            if (result.dismiss === Swal.DismissReason.timer) {
-                console.log("I was closed by the timer");
-            }
-        });
+        // Swal.fire({
+        //     title: "Interpretación Principal!",
+        //     html: `Las escalas más elevadas son: <br></br>\n${scaleNames}<br></br>\n Puntuación BR más alta: ${maxBR}\n  <br></br> Categoría: ${category}\n\n <br></br>Nota: Esta interpretación es preliminar. Se recomienda consultar con un profesional de la salud mental calificado para una evaluación completa.`,
+        //     timer: 10000,
+        //     timerProgressBar: false,
+        //     didOpen: () => {
+        //         Swal.showLoading();
+        //         const timer = Swal.getPopup().querySelector("b");
+        //         timerInterval = setInterval(() => {
+        //             timer.textContent = `${Swal.getTimerLeft()}`;
+        //         }, 100);
+        //     },
+        //     willClose: () => {
+        //         clearInterval(timerInterval);
+        //     }
+        // }).then((result) => {
+        //     /* Read more about handling dismissals below */
+        //     if (result.dismiss === Swal.DismissReason.timer) {
+        //         console.log("I was closed by the timer");
+        //     }
+        // });
     }
 }
 

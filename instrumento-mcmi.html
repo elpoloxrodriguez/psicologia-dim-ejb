@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evaluación MCMI-III - Paciente</title>
+    <title>Evaluación</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -384,28 +384,60 @@
                 text-align: center;
             }
         }
+
+        #evaluation-completed-alert {
+    background: #d4edda;
+    color: #155724;
+    padding: 1rem;
+    margin: 1rem 0;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.disabled-evaluation {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.disabled-evaluation .question,
+.disabled-evaluation .option {
+    background: #f8f9fa !important;
+    color: #6c757d !important;
+    border-color: #dee2e6 !important;
+}
     </style>
 </head>
 <body>
     <!-- Header del paciente -->
     <div class="patient-header">
         <div class="patient-info">
-            <h1>Evaluación MCMI-III</h1>
-            <p id="patientWelcome">Paciente: Cargando...</p>
+            <h1>Usuario:</h1>
+            <p id="patientWelcome">Cargando...</p>
         </div>
         <button class="logout-btn" onclick="logoutPatient()">
             <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
         </button>
     </div>
 
+    <div id="evaluation-completed-alert" style="display: none;">
+    <div style="background: #d4edda; color: #155724; padding: 2rem; margin: 0; border-bottom: 1px solid #c3e6cb;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <h3 style="margin: 0 0 0.5rem 0; color: #155724;">✅ Evaluación Completada</h3>
+            <p style="margin: 0; font-size: 1.1rem;">Usted ya ha completado esta evaluación. No es posible realizarla nuevamente.</p>
+            <p style="margin: 0.5rem 0 0 0;"><strong>Fecha de realización:</strong> <span id="completion-date"></span></p>
+        </div>
+    </div>
+</div>
+
     <div class="container">
         <header>
-            <h1>Evaluación Psicológica del Ejército Bolivariano</h1>
-            <h2>(MCMI-III)</h2>
-            <p class="description">
-                Este inventario evalúa patrones de personalidad y síndromes clínicos. 
-                Responda con sinceridad marcando VERDADERO o FALSO para cada afirmación según se aplique a usted.
-            </p>
+            <h1> Ejército Bolivariano</h1>
             <div class="instructions">
                 <h3>Instrucciones:</h3>
                 <ul>
@@ -413,10 +445,11 @@
                     <li>Marque VERDADERO si la afirmación se aplica a usted</li>
                     <li>Marque FALSO si la afirmación NO se aplica a usted</li>
                     <li>Responda todas las 175 preguntas</li>
-                    <li>Sea honesto en sus respuestas para obtener resultados precisos</li>
+                    <li>Sea honesto en sus respuestas</li>
                 </ul>
             </div>
         </header>
+
 
         <div class="evaluation-container">
             <div class="section-row">
@@ -464,7 +497,7 @@
         </div>
 
         <!-- Tabla de interpretación -->
-        <div class="interpretation-section">
+        <!-- <div class="interpretation-section">
             <h3>Interpretación de Puntuaciones Base (BR)</h3>
             <div class="interpretation-table">
                 <table>
@@ -504,12 +537,11 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </div> -->
 
         <footer>
             <p>
-                <strong>Nota importante:</strong> Este es un instrumento de evaluación psicológica que debe ser 
-                administrado e interpretado por profesionales de la salud mental calificados.
+                Dirección de Tecnologia de la Información y las Comunicaciones del Ejército Bolivariano
             </p>
         </footer>
         
@@ -520,8 +552,110 @@
     
     <!-- Incluir el JavaScript del instrumento MCMI-III -->
     <script src="js/instrumento-mcmi.js"></script>
+
+    <script>
+    // Función para verificar si ya completó la evaluación
+    async function checkEvaluationStatus() {
+        try {
+            
+            const response = await fetch('php/check-evaluation-status.php');
+            const data = await response.json();
+            
+            
+            if (data.completed) {
+                showEvaluationCompleted(data);
+                return true;
+            } else {
+                return false;
+            }
+        } catch (error) {
+            return false;
+        }
+    }
+
+    // Función para mostrar que la evaluación ya fue completada
+    function showEvaluationCompleted(data) {
+        
+        // Ocultar contenedor de evaluación principal
+        const evaluationContainer = document.querySelector('.evaluation-container');
+        if (evaluationContainer) {
+            evaluationContainer.style.display = 'none';
+        }
+        
+        // Ocultar el header de instrucciones
+        const header = document.querySelector('header');
+        if (header) {
+            header.style.display = 'none';
+        }
+        
+        // Mostrar alerta de evaluación completada
+        const alertDiv = document.getElementById('evaluation-completed-alert');
+        const completionDateSpan = document.getElementById('completion-date');
+        
+        if (alertDiv && completionDateSpan) {
+            alertDiv.style.display = 'block';
+            
+            if (data.completion_date) {
+                const date = new Date(data.completion_date);
+                completionDateSpan.textContent = date.toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } else {
+                completionDateSpan.textContent = 'Fecha no disponible';
+            }
+        }
+        
+        // Deshabilitar todos los botones
+        disableAllButtons();
+    }
+
+    // Función para deshabilitar todos los botones
+    function disableAllButtons() {
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            if (!button.classList.contains('logout-btn')) {
+                button.disabled = true;
+                button.style.opacity = '0.6';
+                button.style.cursor = 'not-allowed';
+            }
+        });
+        
+        // Deshabilitar opciones de respuesta
+        const options = document.querySelectorAll('.option');
+        options.forEach(option => {
+            option.style.pointerEvents = 'none';
+            option.style.opacity = '0.5';
+        });
+    }
+
+    // Función para verificar manualmente el estado
+    function manualCheckStatus() {
+        return checkEvaluationStatus();
+    }
+
+    // Modificar la función de inicialización para verificar el estado
+    document.addEventListener('DOMContentLoaded', async function() {
+        
+        // Primero verificar sesión
+        await checkPatientSession();
+        
+        // Luego verificar si ya completó la evaluación
+        const isCompleted = await checkEvaluationStatus();
+        
+        if (!isCompleted) {
+            console.log('✅ Evaluación disponible - Inicializando interfaz normal');
+            // Aquí se cargaría el resto de la funcionalidad normal
+        }
+    });
+</script>
     
     <script>
+
+        
         // Función para cerrar sesión del paciente
         async function logoutPatient() {
             try {
@@ -551,7 +685,7 @@
                     // Actualizar la información del paciente
                     const patientWelcome = document.getElementById('patientWelcome');
                     if (patientWelcome && data.patient) {
-                        patientWelcome.textContent = `Paciente: ${data.patient.name} (Cédula: ${data.patient.cedula})`;
+                        patientWelcome.textContent = `${data.patient.name} (Cédula: ${data.patient.cedula})`;
                     }
                 } else {
                     // Redirigir al login si no hay sesión

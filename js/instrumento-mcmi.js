@@ -800,6 +800,351 @@ function validateResponses() {
     }
 }
 
+
+// Función para verificar si ya completó la evaluación
+// Función para verificar si ya completó la evaluación
+async function checkEvaluationStatus() {
+    try {
+        
+        const response = await fetch('php/check-evaluation-status.php');
+        const data = await response.json();
+        
+        
+        if (data.completed) {
+            showEvaluationCompleted(data);
+            return true;
+        } else {
+            if (data.error) {
+                console.error('❌ Error del servidor:', data.error);
+            }
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Error verificando estado de evaluación:', error);
+        return false;
+    }
+}
+
+// Función para mostrar que la evaluación ya fue completada
+function showEvaluationCompleted(data) {
+    console.log('🚨 Mostrando interfaz de evaluación completada');
+    
+    // Ocultar contenedor de evaluación principal
+    const evaluationContainer = document.querySelector('.evaluation-container');
+    if (evaluationContainer) {
+        evaluationContainer.style.display = 'none';
+        console.log('📦 Contenedor de evaluación ocultado');
+    }
+    
+    // Ocultar el header de instrucciones
+    const header = document.querySelector('header');
+    if (header) {
+        header.style.display = 'none';
+    }
+    
+    // Mostrar alerta de evaluación completada
+    const alertDiv = document.getElementById('evaluation-completed-alert');
+    const completionDateSpan = document.getElementById('completion-date');
+    
+    if (alertDiv && completionDateSpan) {
+        alertDiv.style.display = 'block';
+        
+        if (data.completion_date) {
+            const date = new Date(data.completion_date);
+            completionDateSpan.textContent = date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } else {
+            completionDateSpan.textContent = 'Fecha no disponible';
+        }
+        
+        // Scroll a la alerta
+        alertDiv.scrollIntoView({ behavior: 'smooth' });
+        console.log('📢 Alerta de evaluación completada mostrada');
+    } else {
+        console.error('❌ No se encontraron elementos para mostrar alerta');
+    }
+    
+    // Deshabilitar todos los botones
+    disableAllButtons();
+    
+    // Mostrar mensaje adicional en results-container
+    const resultsContainer = document.getElementById('results-container');
+    if (resultsContainer) {
+        resultsContainer.innerHTML = `
+            <div style="text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 8px;">
+                <h3 style="color: #28a745;">✅ Evaluación Completada</h3>
+                <p>Usted ya ha realizado esta evaluación el <strong>${completionDateSpan.textContent}</strong></p>
+                <p>No es posible realizar la evaluación nuevamente.</p>
+                <p style="color: #6c757d; font-size: 0.9rem;">
+                    Si necesita realizar cambios, contacte al administrador del sistema.
+                </p>
+            </div>
+        `;
+    }
+}
+
+// Función para deshabilitar todos los botones
+function disableAllButtons() {
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+        if (!button.classList.contains('logout-btn')) { // No deshabilitar logout
+            button.disabled = true;
+            button.style.opacity = '0.6';
+            button.style.cursor = 'not-allowed';
+            console.log(`🔒 Botón deshabilitado: ${button.textContent}`);
+        }
+    });
+    
+    // Deshabilitar opciones de respuesta
+    const options = document.querySelectorAll('.option');
+    options.forEach(option => {
+        option.style.pointerEvents = 'none';
+        option.style.opacity = '0.5';
+        option.style.cursor = 'not-allowed';
+    });
+    
+    console.log('🔒 Todas las opciones de respuesta deshabilitadas');
+}
+
+// Modificar la función de inicialización para mejor control
+document.addEventListener('DOMContentLoaded', async function () {
+
+    // Primero verificar si ya completó la evaluación
+    const isCompleted = await checkEvaluationStatus();
+    
+    if (isCompleted) {
+        // console.log('⛔ Evaluación completada - Bloqueando acceso');
+        return; // Detener la ejecución aquí
+    }
+    
+    
+    // Solo inicializar la evaluación si no está completada
+    generateQuestions();
+    addTestButton();
+
+    // Event listeners para los botones
+    document.getElementById('validate-btn').addEventListener('click', validateResponses);
+    document.getElementById('calculate-btn').addEventListener('click', calculateResults);
+    document.getElementById('clear-btn').addEventListener('click', clearAllResponses);
+
+});
+
+// Función para verificar manualmente el estado (para debugging)
+function manualCheckStatus() {
+    // console.log('🛠️ Verificación manual del estado...');
+    return checkEvaluationStatus();
+}
+
+
+// También agreguemos una función para ver la sesión actual
+function checkCurrentSession() {
+    // console.log('🔍 Verificando sesión actual...');
+    return fetch('php/check-patient-session.php')
+        .then(response => response.json())
+        .then(data => {
+            // console.log('📊 Datos de sesión:', data);
+            return data;
+        });
+}
+
+// Función para mostrar que la evaluación ya fue completada
+function showEvaluationCompleted(data) {
+    // Ocultar contenedor de evaluación
+    const evaluationContainer = document.querySelector('.evaluation-container');
+    if (evaluationContainer) {
+        evaluationContainer.style.display = 'none';
+    }
+    
+    // Mostrar alerta de evaluación completada
+    const alertDiv = document.getElementById('evaluation-completed-alert');
+    const completionDateSpan = document.getElementById('completion-date');
+    
+    if (alertDiv && completionDateSpan) {
+        alertDiv.style.display = 'block';
+        
+        if (data.completion_date) {
+            const date = new Date(data.completion_date);
+            completionDateSpan.textContent = date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Scroll a la alerta
+        alertDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Deshabilitar todos los botones
+    disableAllButtons();
+    
+    // Mostrar mensaje en la consola
+    console.log('Evaluación ya completada. Bloqueando interfaz.');
+}
+
+// Función para deshabilitar todos los botones
+function disableAllButtons() {
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+        if (!button.classList.contains('logout-btn')) { // No deshabilitar logout
+            button.disabled = true;
+            button.style.opacity = '0.6';
+            button.style.cursor = 'not-allowed';
+        }
+    });
+    
+    // Deshabilitar opciones de respuesta
+    const options = document.querySelectorAll('.option');
+    options.forEach(option => {
+        option.style.pointerEvents = 'none';
+        option.style.opacity = '0.5';
+    });
+}
+
+// Función para obtener el estado de la evaluación
+async function getEvaluationStatus() {
+    try {
+        const patientId = await getPatientIdFromSession();
+        if (!patientId) return null;
+        
+        const response = await fetch('php/save-results.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'get_evaluation_status',
+                patient_id: patientId
+            })
+        });
+        
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error obteniendo estado de evaluación:', error);
+        return null;
+    }
+}
+
+// Modificar la función de inicialización
+document.addEventListener('DOMContentLoaded', async function () {
+    // console.log('Iniciando MCMI-III...');
+
+    // Primero verificar si ya completó la evaluación
+    const isCompleted = await checkEvaluationStatus();
+    
+    if (!isCompleted) {
+        // Solo inicializar la evaluación si no está completada
+        generateQuestions();
+        addTestButton();
+
+        // Event listeners para los botones
+        document.getElementById('validate-btn').addEventListener('click', validateResponses);
+        document.getElementById('calculate-btn').addEventListener('click', calculateResults);
+        document.getElementById('clear-btn').addEventListener('click', clearAllResponses);
+
+        console.log('MCMI-III Evaluation Tool loaded successfully');
+        console.log('Total questions:', questions.length);
+        console.log('Total scales:', Object.keys(scales).length);
+    }
+});
+
+// Modificar la función de guardar resultados para marcar como completado
+async function saveResultsToDatabase(results, responses, interpretation = '') {
+    try {
+        const patientId = await getPatientIdFromSession();
+        
+        if (!patientId) {
+            console.error('No se pudo obtener el ID del paciente');
+            return false;
+        }
+        
+        // PREPARAR DATOS EN EL FORMATO CORRECTO PARA EL BACKEND
+        const formattedResults = {};
+        
+        // Mapear todas las escalas en el formato que espera el backend
+        const allScales = [
+            '1', '2A', '2B', '3', '4', '5', '6A', '6B', '7', '8A', '8B',
+            'S', 'C', 'P', 'A', 'H', 'N', 'D', 'B', 'T', 'R',
+            'SS', 'CC', 'PP', 'X', 'Y', 'Z', 'V'
+        ];
+        
+        allScales.forEach(scaleId => {
+            if (results[scaleId]) {
+                formattedResults[scaleId] = {
+                    rawScore: results[scaleId].rawScore || 0,
+                    brScore: results[scaleId].brScore || 0
+                };
+            } else {
+                formattedResults[scaleId] = {
+                    rawScore: 0,
+                    brScore: 0
+                };
+            }
+        });
+        
+        const data = {
+            action: 'save',
+            patient_id: parseInt(patientId),
+            results: formattedResults,
+            responses: responses,
+            interpretation: interpretation,
+            mark_completed: true // Nueva bandera para marcar como completado
+        };
+        
+        console.log('Enviando datos al servidor:', JSON.stringify(data, null, 2));
+        
+        const response = await fetch('php/save-results.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        console.log('Respuesta del servidor:', result);
+        
+        if (result.success) {
+            console.log('Resultados guardados exitosamente. ID:', result.result_id);
+            
+            // Mostrar mensaje de que no podrá realizar más evaluaciones
+            setTimeout(() => {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Evaluación Completada',
+                    html: `
+                        <div style="text-align: left;">
+                            <p>✅ <strong>Evaluación guardada exitosamente.</strong></p>
+                            <p>📝 <strong>Importante:</strong> Esta evaluación solo puede realizarse una vez.</p>
+                            <p>🔒 <strong>No podrá realizar esta evaluación nuevamente.</strong></p>
+                            <p>Si necesita realizar cambios o tiene alguna inquietud, contacte al administrador.</p>
+                        </div>
+                    `,
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#3498db'
+                });
+            }, 1000);
+            
+            return result.result_id;
+        } else {
+            console.error('Error guardando resultados:', result.message);
+            return false;
+        }
+        
+    } catch (error) {
+        console.error('Error guardando resultados:', error);
+        return false;
+    }
+}
+
 // Función para limpiar todas las respuestas
 function clearAllResponses() {
     if (confirm('¿Está seguro de que desea borrar todas las respuestas?')) {
@@ -1289,27 +1634,27 @@ function showGeneralInterpretation(results) {
         //     alert(`Interpretación Principal:\n\nLas escalas más elevadas son: ${scaleNames}\nPuntuación BR más alta: ${maxBR}\nCategoría: ${category}\n\nNota: Esta interpretación es preliminar. Se recomienda consultar con un profesional de la salud mental calificado para una evaluación completa.`);
         // }, 500);
         let timerInterval;
-        Swal.fire({
-            title: "Interpretación Principal!",
-            html: `Las escalas más elevadas son: <br></br>\n${scaleNames}<br></br>\n Puntuación BR más alta: ${maxBR}\n  <br></br> Categoría: ${category}\n\n <br></br>Nota: Esta interpretación es preliminar. Se recomienda consultar con un profesional de la salud mental calificado para una evaluación completa.`,
-            timer: 10000,
-            timerProgressBar: false,
-            didOpen: () => {
-                Swal.showLoading();
-                const timer = Swal.getPopup().querySelector("b");
-                timerInterval = setInterval(() => {
-                    timer.textContent = `${Swal.getTimerLeft()}`;
-                }, 100);
-            },
-            willClose: () => {
-                clearInterval(timerInterval);
-            }
-        }).then((result) => {
-            /* Read more about handling dismissals below */
-            if (result.dismiss === Swal.DismissReason.timer) {
-                console.log("I was closed by the timer");
-            }
-        });
+        // Swal.fire({
+        //     title: "Interpretación Principal!",
+        //     html: `Las escalas más elevadas son: <br></br>\n${scaleNames}<br></br>\n Puntuación BR más alta: ${maxBR}\n  <br></br> Categoría: ${category}\n\n <br></br>Nota: Esta interpretación es preliminar. Se recomienda consultar con un profesional de la salud mental calificado para una evaluación completa.`,
+        //     timer: 10000,
+        //     timerProgressBar: false,
+        //     didOpen: () => {
+        //         Swal.showLoading();
+        //         const timer = Swal.getPopup().querySelector("b");
+        //         timerInterval = setInterval(() => {
+        //             timer.textContent = `${Swal.getTimerLeft()}`;
+        //         }, 100);
+        //     },
+        //     willClose: () => {
+        //         clearInterval(timerInterval);
+        //     }
+        // }).then((result) => {
+        //     /* Read more about handling dismissals below */
+        //     if (result.dismiss === Swal.DismissReason.timer) {
+        //         console.log("I was closed by the timer");
+        //     }
+        // });
     }
 }
 
