@@ -1050,9 +1050,9 @@ document.addEventListener('DOMContentLoaded', async function () {
         document.getElementById('calculate-btn').addEventListener('click', calculateResults);
         document.getElementById('clear-btn').addEventListener('click', clearAllResponses);
 
-        console.log('MCMI-III Evaluation Tool loaded successfully');
-        console.log('Total questions:', questions.length);
-        console.log('Total scales:', Object.keys(scales).length);
+        // console.log('MCMI-III Evaluation Tool loaded successfully');
+        // console.log('Total questions:', questions.length);
+        // console.log('Total scales:', Object.keys(scales).length);
     }
 });
 
@@ -1332,7 +1332,7 @@ function displayResults(results) {
         </table>
     `;
 
-    resultsContainer.innerHTML = html;
+    // resultsContainer.innerHTML = html;
 
     // Crear el gráfico después de que se hayan renderizado los resultados
     // y el canvas esté disponible en el DOM
@@ -1341,18 +1341,18 @@ function displayResults(results) {
         // Forzar un reflow para asegurar que el canvas esté en el DOM
         void canvas.offsetHeight;
 
-        console.log('Preparando para crear el gráfico...');
-        console.log('Datos del gráfico:', JSON.stringify(chartData, null, 2));
+        // console.log('Preparando para crear el gráfico...');
+        // console.log('Datos del gráfico:', JSON.stringify(chartData, null, 2));
 
         // Verificar si el canvas está en el DOM
-        console.log('Elemento canvas encontrado:', !!canvas);
+        // console.log('Elemento canvas encontrado:', !!canvas);
         if (canvas) {
-            console.log('Dimensiones del canvas:', {
-                width: canvas.offsetWidth,
-                height: canvas.offsetHeight,
-                clientWidth: canvas.clientWidth,
-                clientHeight: canvas.clientHeight
-            });
+            // console.log('Dimensiones del canvas:', {
+            //     width: canvas.offsetWidth,
+            //     height: canvas.offsetHeight,
+            //     clientWidth: canvas.clientWidth,
+            //     clientHeight: canvas.clientHeight
+            // });
 
             // Limpiar los datos del gráfico antes de crearlo
             const cleanChartData = JSON.parse(JSON.stringify(chartData));
