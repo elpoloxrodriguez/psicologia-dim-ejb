@@ -663,11 +663,11 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    window.location.href = 'login.html';
+                    window.location.href = 'index.html';
                 }
             } catch (error) {
                 console.error('Error cerrando sesión:', error);
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
             }
         }
 
@@ -689,11 +689,11 @@
                     }
                 } else {
                     // Redirigir al login si no hay sesión
-                    window.location.href = 'login.html';
+                    window.location.href = 'index.html';
                 }
             } catch (error) {
                 console.error('Error verificando sesión:', error);
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
             }
         }
     </script>

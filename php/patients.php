@@ -88,7 +88,7 @@ class PatientManager {
     public function createPatient($data) {
         try {
             // Validar campos requeridos
-            $required = ['cedula', 'nombres', 'apellidos', 'fecha_nacimiento', 'genero'];
+            $required = ['cedula', 'nombres', 'apellidos', 'fecha_nacimiento', 'genero' , 'password'];
             foreach ($required as $field) {
                 if (empty($data[$field])) {
                     return [
@@ -110,15 +110,17 @@ class PatientManager {
                     'message' => 'La cédula ya está registrada'
                 ];
             }
+
+            $password_hash = password_hash($data['password'], PASSWORD_DEFAULT);
             
             $query = "INSERT INTO mcmi_patients 
                       (cedula, nombres, apellidos, fecha_nacimiento, genero, email, telefono, 
                        direccion, ciudad, estado_civil, ocupacion, educacion, referencia, 
-                       motivo_consulta, antecedentes, observaciones, is_active, created_by) 
+                       motivo_consulta, antecedentes, observaciones, password_hash, is_active, created_by) 
                       VALUES 
                       (:cedula, :nombres, :apellidos, :fecha_nacimiento, :genero, :email, :telefono, 
                        :direccion, :ciudad, :estado_civil, :ocupacion, :educacion, :referencia, 
-                       :motivo_consulta, :antecedentes, :observaciones, :is_active, :created_by)";
+                       :motivo_consulta, :antecedentes, :observaciones, :password_hash, :is_active, :created_by)";
             
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':cedula', $data['cedula']);
@@ -137,8 +139,10 @@ class PatientManager {
             $stmt->bindParam(':motivo_consulta', $data['motivo_consulta']);
             $stmt->bindParam(':antecedentes', $data['antecedentes']);
             $stmt->bindParam(':observaciones', $data['observaciones']);
+            $stmt->bindParam(':password_hash', $password_hash);
             $stmt->bindParam(':is_active', $data['is_active']);
             $stmt->bindParam(':created_by', $_SESSION['user_id']);
+            
             
             if ($stmt->execute()) {
                 return [
