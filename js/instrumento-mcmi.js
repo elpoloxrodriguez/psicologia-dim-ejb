@@ -438,7 +438,6 @@ function interpolateValue(score, scaleId) {
 }
 
 // Función para calcular los resultados
-// Función para calcular los resultados
 async function calculateResults() {
     if (!validateResponses()) {
         alert('Por favor, complete todas las preguntas antes de calcular los resultados.');
@@ -484,7 +483,7 @@ async function calculateResults() {
             brScore,
             categoria
         };
-        console.log(`Escala ${scaleId} - Raw: ${rawScore}, BR: ${brScore}, Categoría: ${categoria}`);
+        // console.log(`Escala ${scaleId} - Raw: ${rawScore}, BR: ${brScore}, Categoría: ${categoria}`);
     }
 
     // 2) Calcular X como suma de brutos de las escalas de personalidad
@@ -507,13 +506,13 @@ async function calculateResults() {
             brScore: brX,
             categoria: categoriaX
         };
-        console.log(`Escala X - Raw: ${rawX}, BR: ${brX}, Categoría: ${categoriaX}`);
+        // console.log(`Escala X - Raw: ${rawX}, BR: ${brX}, Categoría: ${categoriaX}`);
     } else {
         console.error('No se encontró tabla de conversión para la escala X');
     }
 
     // 3) Mostrar resultados
-    console.log('Resultados calculados:', results);
+    // console.log('Resultados calculados:', results);
     displayResults(results);
     
     // 4) Guardar en la base de datos
@@ -570,8 +569,6 @@ function showSaveSuccess(resultId) {
         html: `
             <div style="text-align: left;">
                 <p>Los resultados han sido guardados exitosamente en la base de datos.</p>
-                <p><strong>ID del resultado:</strong> ${resultId}</p>
-                <p>Puede consultar este resultado posteriormente en el historial de evaluaciones.</p>
             </div>
         `,
         confirmButtonText: 'Aceptar',
@@ -601,77 +598,6 @@ function showSaveError() {
     });
 }
 
-// Función para guardar resultados en la base de datos
-// Función para guardar resultados en la base de datos - VERSIÓN CORREGIDA
-async function saveResultsToDatabase(results, responses, interpretation = '') {
-    try {
-        // Obtener ID del paciente desde la sesión
-        const patientId = await getPatientIdFromSession();
-        
-        if (!patientId) {
-            console.error('No se pudo obtener el ID del paciente');
-            return false;
-        }
-        
-        // PREPARAR DATOS EN EL FORMATO CORRECTO PARA EL BACKEND
-        const formattedResults = {};
-        
-        // Mapear todas las escalas en el formato que espera el backend
-        const allScales = [
-            '1', '2A', '2B', '3', '4', '5', '6A', '6B', '7', '8A', '8B',
-            'S', 'C', 'P', 'A', 'H', 'N', 'D', 'B', 'T', 'R',
-            'SS', 'CC', 'PP', 'X', 'Y', 'Z', 'V'
-        ];
-        
-        allScales.forEach(scaleId => {
-            if (results[scaleId]) {
-                formattedResults[scaleId] = {
-                    rawScore: results[scaleId].rawScore || 0,
-                    brScore: results[scaleId].brScore || 0
-                };
-            } else {
-                // Si no existe el resultado para esta escala, poner valores por defecto
-                formattedResults[scaleId] = {
-                    rawScore: 0,
-                    brScore: 0
-                };
-            }
-        });
-        
-        const data = {
-            action: 'save',
-            patient_id: parseInt(patientId),
-            results: formattedResults,
-            responses: responses,
-            interpretation: interpretation
-        };
-        
-        console.log('Enviando datos al servidor:', JSON.stringify(data, null, 2));
-        
-        const response = await fetch('php/save-results.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-        
-        const result = await response.json();
-        console.log('Respuesta del servidor:', result);
-        
-        if (result.success) {
-            console.log('Resultados guardados exitosamente. ID:', result.result_id);
-            return result.result_id;
-        } else {
-            console.error('Error guardando resultados:', result.message);
-            return false;
-        }
-        
-    } catch (error) {
-        console.error('Error guardando resultados:', error);
-        return false;
-    }
-}
 
 // Función para obtener el ID del paciente desde la sesión
 // Función mejorada para obtener el ID del paciente
@@ -827,13 +753,13 @@ async function checkEvaluationStatus() {
 
 // Función para mostrar que la evaluación ya fue completada
 function showEvaluationCompleted(data) {
-    console.log('🚨 Mostrando interfaz de evaluación completada');
+    // console.log('🚨 Mostrando interfaz de evaluación completada');
     
     // Ocultar contenedor de evaluación principal
     const evaluationContainer = document.querySelector('.evaluation-container');
     if (evaluationContainer) {
         evaluationContainer.style.display = 'none';
-        console.log('📦 Contenedor de evaluación ocultado');
+        // console.log('📦 Contenedor de evaluación ocultado');
     }
     
     // Ocultar el header de instrucciones
@@ -864,7 +790,7 @@ function showEvaluationCompleted(data) {
         
         // Scroll a la alerta
         alertDiv.scrollIntoView({ behavior: 'smooth' });
-        console.log('📢 Alerta de evaluación completada mostrada');
+        // console.log('📢 Alerta de evaluación completada mostrada');
     } else {
         console.error('❌ No se encontraron elementos para mostrar alerta');
     }
@@ -908,7 +834,7 @@ function disableAllButtons() {
         option.style.cursor = 'not-allowed';
     });
     
-    console.log('🔒 Todas las opciones de respuesta deshabilitadas');
+    // console.log('🔒 Todas las opciones de respuesta deshabilitadas');
 }
 
 // Modificar la función de inicialización para mejor control
@@ -1096,7 +1022,7 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
             results: formattedResults,
             responses: responses,
             interpretation: interpretation,
-            mark_completed: true // Nueva bandera para marcar como completado
+            mark_completed: true
         };
         
         console.log('Enviando datos al servidor:', JSON.stringify(data, null, 2));
@@ -1115,25 +1041,24 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
         if (result.success) {
             console.log('Resultados guardados exitosamente. ID:', result.result_id);
             
-            // Mostrar mensaje de que no podrá realizar más evaluaciones
-            setTimeout(() => {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Evaluación Completada',
-                    html: `
-                        <div style="text-align: left;">
-                            <p>✅ <strong>Evaluación guardada exitosamente.</strong></p>
-                            <p>📝 <strong>Importante:</strong> Esta evaluación solo puede realizarse una vez.</p>
-                            <p>🔒 <strong>No podrá realizar esta evaluación nuevamente.</strong></p>
-                            <p>Si necesita realizar cambios o tiene alguna inquietud, contacte al administrador.</p>
-                        </div>
-                    `,
-                    confirmButtonText: 'Entendido',
-                    confirmButtonColor: '#3498db'
-                });
-            }, 1000);
+            // ELIMINAR EL setTimeout y usar await directamente
+            // await Swal.fire({
+            //     icon: 'success',
+            //     title: 'Evaluación Completada',
+            //     html: `
+            //         <div style="text-align: left;">
+            //             <p>✅ <strong>Evaluación guardada exitosamente.</strong></p>
+            //             <p>🔒 Esta evaluación solo puede realizarse una vez.</p>
+            //         </div>
+            //     `,
+            //     confirmButtonText: 'Entendido',
+            //     confirmButtonColor: '#3498db',
+            //     allowOutsideClick: false,
+            //     allowEscapeKey: false
+            // });
             
             return result.result_id;
+            
         } else {
             console.error('Error guardando resultados:', result.message);
             return false;
