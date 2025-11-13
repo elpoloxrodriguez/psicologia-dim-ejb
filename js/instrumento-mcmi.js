@@ -603,21 +603,54 @@ function showSaveError() {
 // Función mejorada para obtener el ID del paciente
 async function getPatientIdFromSession() {
     try {
-        const response = await fetch('php/check-patient-session.php');
-        const data = await response.json();
+        console.log('🔍 Verificando sesión del paciente...');
         
-        console.log('Datos de sesión:', data);
+        const response = await fetch('php/check-patient-session.php', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // Agregar opciones para evitar caché
+            cache: 'no-cache'
+        });
         
-        if (data.logged_in && data.patient) {
-            console.log('Paciente encontrado:', data.patient);
-            return data.patient.id;
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
         }
         
-        console.warn('No se encontró sesión de paciente válida');
-        return null;
+        const data = await response.json();
+        console.log('📊 Respuesta de sesión:', data);
+        
+        if (data.success && data.logged_in && data.patient) {
+            console.log('✅ Paciente encontrado:', data.patient);
+            return data.patient.id;
+        } else {
+            console.warn('❌ No se encontró sesión de paciente válida:', data.message || 'Sin mensaje');
+            return null;
+        }
         
     } catch (error) {
-        console.error('Error obteniendo sesión del paciente:', error);
+        console.error('❌ Error obteniendo sesión del paciente:', error);
+        
+        // Mostrar alerta al usuario
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de Sesión',
+            html: `
+                <div style="text-align: left;">
+                    <p>No se pudo verificar su sesión. Posibles causas:</p>
+                    <ul>
+                        <li>La sesión expiró</li>
+                        <li>Problema de conexión</li>
+                        <li>Error del servidor</li>
+                    </ul>
+                    <p>Por favor, recargue la página o contacte al administrador.</p>
+                </div>
+            `,
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#dc3545'
+        });
+        
         return null;
     }
 }

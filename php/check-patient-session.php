@@ -2,62 +2,75 @@
 header('Content-Type: application/json');
 session_start();
 
-require_once '../config/database.php';
+// Habilitar errores para debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-function checkPatientSession() {
-    try {
-        if (isset($_SESSION['patient_logged_in']) && $_SESSION['patient_logged_in'] === true) {
+try {
+    // Verificar si la sesión existe y tiene los datos necesarios
+    $response = [
+        'success' => false,
+        'logged_in' => false,
+        'evaluation_completed' => false,
+        'session_data' => $_SESSION // Para debugging
+    ];
+
+    // Verificar si el paciente está logueado
+    if (isset($_SESSION['patient_logged_in']) && $_SESSION['patient_logged_in'] === true) {
+        $response['logged_in'] = true;
+        $response['success'] = true;
+        
+        // Agregar datos del paciente si existen
+        if (isset($_SESSION['patient_id'])) {
+            $response['patient'] = [
+                'id' => $_SESSION['patient_id'],
+                'cedula' => $_SESSION['patient_cedula'] ?? null,
+                'name' => $_SESSION['patient_name'] ?? null
+            ];
             
-            // Verificar también si ya completó la evaluación
-            $evaluationCompleted = false;
-            $completionDate = null;
-            
-            if (isset($_SESSION['patient_id'])) {
+            // Verificar si ya completó la evaluación
+            try {
+                require_once '../config/database.php';
                 $database = new Database();
                 $db = $database->connect();
                 
-                $query = "SELECT completion_date FROM mcmi_results 
+                $query = "SELECT completion_date, status FROM mcmi_results 
                          WHERE patient_id = :patient_id 
-                         ORDER BY created_at DESC LIMIT 1";
+                         AND status = 'completed'
+                         ORDER BY completion_date DESC LIMIT 1";
                 $stmt = $db->prepare($query);
-                $stmt->bindParam(':patient_id', $_SESSION['patient_id']);
+                $stmt->bindParam(':patient_id', $_SESSION['patient_id'], PDO::PARAM_INT);
                 $stmt->execute();
                 
                 $result = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($result) {
-                    $evaluationCompleted = true;
-                    $completionDate = $result['completion_date'];
+                    $response['evaluation_completed'] = true;
+                    $response['completion_date'] = $result['completion_date'];
+                    $response['status'] = $result['status'];
                 }
+                
+            } catch (PDOException $e) {
+                error_log("Error DB en check-patient-session: " . $e->getMessage());
+                $response['db_error'] = $e->getMessage();
             }
-            
-            return [
-                'success' => true,
-                'logged_in' => true,
-                'evaluation_completed' => $evaluationCompleted,
-                'completion_date' => $completionDate,
-                'patient' => [
-                    'id' => $_SESSION['patient_id'] ?? null,
-                    'cedula' => $_SESSION['patient_cedula'] ?? null,
-                    'name' => $_SESSION['patient_name'] ?? null
-                ]
-            ];
-        } else {
-            return [
-                'success' => true,
-                'logged_in' => false,
-                'evaluation_completed' => false
-            ];
         }
-    } catch (Exception $e) {
-        error_log("Error en check-patient-session: " . $e->getMessage());
-        return [
-            'success' => false,
-            'logged_in' => false,
-            'evaluation_completed' => false,
-            'message' => 'Error verificando sesión'
-        ];
+    } else {
+        $response['success'] = true; // Éxito en la verificación, pero no logueado
+        $response['message'] = 'Paciente no logueado';
     }
-}
 
-echo json_encode(checkPatientSession());
+    echo json_encode($response);
+    
+} catch (Exception $e) {
+    error_log("Error general en check-patient-session: " . $e->getMessage());
+    
+    // Respuesta de error
+    echo json_encode([
+        'success' => false,
+        'logged_in' => false,
+        'evaluation_completed' => false,
+        'error' => 'Error interno del servidor',
+        'debug_info' => $e->getMessage()
+    ]);
+}
 ?>
