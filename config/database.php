@@ -24,7 +24,4 @@ class Database {
     }
 }
 
-// Uso
-$database = new Database();
-$db = $database->connect();
 ?>

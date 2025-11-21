@@ -248,9 +248,6 @@ if ($resultId === 0) {
             <button onclick="printReport()" class="btn btn-primary">
                 <i class="fas fa-print"></i> Imprimir Reporte
             </button>
-            <button onclick="downloadPDF()" class="btn btn-success">
-                <i class="fas fa-download"></i> Descargar PDF
-            </button>
         </div>
     </div>
 
@@ -1044,10 +1041,7 @@ function generateChart(result) {
             window.print();
         }
         
-        function downloadPDF() {
-            alert('Funcionalidad de descarga PDF en desarrollo...');
-            // Aquí integrarías una librería como jsPDF o harías una llamada al servidor
-        }
+
         
         // Cargar el reporte al iniciar
         document.addEventListener('DOMContentLoaded', loadReport);
