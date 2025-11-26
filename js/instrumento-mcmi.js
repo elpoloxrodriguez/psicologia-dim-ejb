@@ -1145,6 +1145,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 });
 
 // Modificar la función de guardar resultados para marcar como completado
+// Función para guardar resultados en la base de datos
 async function saveResultsToDatabase(results, responses, interpretation = '') {
     try {
         const patientId = await getPatientIdFromSession();
@@ -1203,28 +1204,16 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
         if (result.success) {
             console.log('Resultados guardados exitosamente. ID:', result.result_id);
             
-            // ELIMINAR EL setTimeout y usar await directamente
-            // await Swal.fire({
-            //     icon: 'success',
-            //     title: 'Evaluación Completada',
-            //     html: `
-            //         <div style="text-align: left;">
-            //             <p>✅ <strong>Evaluación guardada exitosamente.</strong></p>
-            //             <p>🔒 Esta evaluación solo puede realizarse una vez.</p>
-            //         </div>
-            //     `,
-            //     confirmButtonText: 'Entendido',
-            //     confirmButtonColor: '#3498db',
-            //     allowOutsideClick: false,
-            //     allowEscapeKey: false
-            // });
-
-                // Bloquear la interfaz inmediatamente
-            lockInterfaceAfterSave();
+            // VERIFICAR SI EL BACKEND INDICA QUE DEBE CERRAR SESIÓN
+            if (result.logout_required) {
+                console.log('El backend indica que se debe cerrar sesión');
+                await handleAutomaticLogout();
+            } else {
+                // Si no hay indicación del backend, usar el método anterior
+                await showSaveSuccessAndLogout(result.result_id);
+            }
             
             return result.result_id;
-
-            
             
         } else {
             console.error('Error guardando resultados:', result.message);
@@ -1234,6 +1223,89 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
     } catch (error) {
         console.error('Error guardando resultados:', error);
         return false;
+    }
+}
+
+// NUEVA FUNCIÓN: Manejar cierre de sesión automático
+async function handleAutomaticLogout() {
+    try {
+        // Bloquear toda la interfaz inmediatamente
+        lockInterfaceAfterSave();
+        
+        // Mostrar mensaje de éxito con redirección automática
+        await Swal.fire({
+            icon: 'success',
+            title: 'Evaluación Completada',
+            html: `
+                <div style="text-align: left;">
+                    <p>✅ <strong>Evaluación guardada exitosamente.</strong></p>
+                    <p>🔒 <strong>Sesión cerrada automáticamente.</strong></p>
+                    <p>🔄 <strong>Redirigiendo al inicio en 3 segundos...</strong></p>
+                </div>
+            `,
+            confirmButtonText: 'Ir al Inicio Ahora',
+            confirmButtonColor: '#3498db',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Redirigir al index.html
+        window.location.href = 'index.html';
+        
+    } catch (error) {
+        console.error('Error en cierre automático:', error);
+        // Redirigir de todas formas
+        window.location.href = 'index.html';
+    }
+}
+
+// Función para bloquear toda la interfaz después de guardar
+function lockInterfaceAfterSave() {
+    console.log('🔒 Bloqueando interfaz después de guardar...');
+    
+    // Deshabilitar todos los botones
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.disabled = true;
+        button.style.opacity = '0.6';
+        button.style.cursor = 'not-allowed';
+    });
+
+    // Deshabilitar todas las opciones de respuesta
+    const options = document.querySelectorAll('.option');
+    options.forEach(option => {
+        option.style.pointerEvents = 'none';
+        option.style.opacity = '0.5';
+        option.style.cursor = 'not-allowed';
+    });
+
+    // Mostrar mensaje de evaluación completada
+    const evaluationContainer = document.querySelector('.evaluation-container');
+    if (evaluationContainer) {
+        evaluationContainer.classList.add('disabled-evaluation');
+    }
+
+    // Agregar mensaje visual
+    const header = document.querySelector('header');
+    if (header) {
+        const completedMessage = document.createElement('div');
+        completedMessage.style.cssText = `
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        `;
+        completedMessage.innerHTML = '✅ Evaluación Completada - Redirigiendo al inicio...';
+        header.parentNode.insertBefore(completedMessage, header.nextSibling);
     }
 }
 

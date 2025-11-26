@@ -109,10 +109,16 @@ class ResultsManager {
             if ($stmt->execute()) {
                 $resultId = $stmt->fetch(PDO::FETCH_ASSOC)['id'];
                 error_log("Resultado guardado exitosamente con ID: " . $resultId);
+                
+                // NUEVO: Cerrar sesión del paciente automáticamente
+                $this->logoutPatient();
+                
                 return [
                     'success' => true,
                     'message' => 'Resultados guardados exitosamente',
-                    'result_id' => $resultId
+                    'result_id' => $resultId,
+                    'logout_required' => true, // Nueva bandera
+                    'redirect_url' => 'index.html' // URL a redirigir
                 ];
             } else {
                 $errorInfo = $stmt->errorInfo();
@@ -133,7 +139,38 @@ class ResultsManager {
     }
     
     /**
-     * OBTENER EVALUATOR_ID VÁLIDO - ESTRATEGIA CORREGIDA
+     * NUEVA FUNCIÓN: Cerrar sesión del paciente
+     */
+    private function logoutPatient() {
+        try {
+            error_log("Cerrando sesión del paciente automáticamente...");
+            
+            // Limpiar todas las variables de sesión
+            $_SESSION = array();
+            
+            // Destruir la sesión
+            if (session_destroy()) {
+                error_log("Sesión cerrada exitosamente");
+            } else {
+                error_log("Error al destruir la sesión");
+            }
+            
+            // También eliminar la cookie de sesión
+            if (ini_get("session.use_cookies")) {
+                $params = session_get_cookie_params();
+                setcookie(session_name(), '', time() - 42000,
+                    $params["path"], $params["domain"],
+                    $params["secure"], $params["httponly"]
+                );
+            }
+            
+        } catch (Exception $e) {
+            error_log("Error al cerrar sesión: " . $e->getMessage());
+        }
+    }
+    
+    /**
+     * OBTENER EVALUATOR_ID VÁLIDO - CORREGIDO
      */
     private function getValidEvaluatorId($patientId) {
         // Estrategia 1: Buscar un usuario por defecto en mcmi_users
