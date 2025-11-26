@@ -450,6 +450,43 @@ button:disabled {
     cursor: not-allowed !important;
     opacity: 0.6 !important;
 }
+
+/* Estilos para la redirección rápida */
+.redirect-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    flex-direction: column;
+}
+
+.redirect-message {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    text-align: center;
+    border: 2px solid #28a745;
+    max-width: 400px;
+}
+
+.redirect-message h3 {
+    color: #28a745;
+    margin-bottom: 1rem;
+}
+
+.redirect-spinner {
+    font-size: 2rem;
+    color: #28a745;
+    margin: 1rem 0;
+}
+
     </style>
 </head>
 

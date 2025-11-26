@@ -1144,7 +1144,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 });
 
-// Modificar la función de guardar resultados para marcar como completado
 // Función para guardar resultados en la base de datos
 async function saveResultsToDatabase(results, responses, interpretation = '') {
     try {
@@ -1155,10 +1154,8 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
             return false;
         }
         
-        // PREPARAR DATOS EN EL FORMATO CORRECTO PARA EL BACKEND
+        // PREPARAR DATOS
         const formattedResults = {};
-        
-        // Mapear todas las escalas en el formato que espera el backend
         const allScales = [
             '1', '2A', '2B', '3', '4', '5', '6A', '6B', '7', '8A', '8B',
             'S', 'C', 'P', 'A', 'H', 'N', 'D', 'B', 'T', 'R',
@@ -1188,7 +1185,7 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
             mark_completed: true
         };
         
-        console.log('Enviando datos al servidor:', JSON.stringify(data, null, 2));
+        console.log('Enviando datos al servidor...');
         
         const response = await fetch('php/save-results.php', {
             method: 'POST',
@@ -1202,65 +1199,117 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
         console.log('Respuesta del servidor:', result);
         
         if (result.success) {
-            console.log('Resultados guardados exitosamente. ID:', result.result_id);
+            console.log('✅ Resultados guardados exitosamente');
             
-            // VERIFICAR SI EL BACKEND INDICA QUE DEBE CERRAR SESIÓN
-            if (result.logout_required) {
-                console.log('El backend indica que se debe cerrar sesión');
-                await handleAutomaticLogout();
-            } else {
-                // Si no hay indicación del backend, usar el método anterior
-                await showSaveSuccessAndLogout(result.result_id);
-            }
+            // USAR LA VERSIÓN RÁPIDA
+            await handleAutomaticLogout();
             
             return result.result_id;
             
         } else {
-            console.error('Error guardando resultados:', result.message);
+            console.error('❌ Error guardando resultados:', result.message);
+            
+            // Re-habilitar el botón en caso de error
+            const calculateBtn = document.getElementById('calculate-btn');
+            if (calculateBtn) {
+                calculateBtn.disabled = false;
+                calculateBtn.innerHTML = 'Guardar Prueba';
+                calculateBtn.style.background = '#28a745';
+            }
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudieron guardar los resultados: ' + result.message,
+                confirmButtonText: 'Aceptar'
+            });
+            
             return false;
         }
         
     } catch (error) {
-        console.error('Error guardando resultados:', error);
+        console.error('❌ Error guardando resultados:', error);
+        
+        // Re-habilitar el botón en caso de error
+        const calculateBtn = document.getElementById('calculate-btn');
+        if (calculateBtn) {
+            calculateBtn.disabled = false;
+            calculateBtn.innerHTML = 'Guardar Prueba';
+            calculateBtn.style.background = '#28a745';
+        }
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de Conexión',
+            text: 'No se pudo conectar con el servidor. Por favor, intente nuevamente.',
+            confirmButtonText: 'Aceptar'
+        });
+        
         return false;
     }
 }
 
 // NUEVA FUNCIÓN: Manejar cierre de sesión automático
+// OPCIÓN MÁS DIRECTA - Sin SweetAlert
 async function handleAutomaticLogout() {
     try {
+        console.log('🔄 Iniciando cierre de sesión automático...');
+        
         // Bloquear toda la interfaz inmediatamente
         lockInterfaceAfterSave();
         
-        // Mostrar mensaje de éxito con redirección automática
-        await Swal.fire({
-            icon: 'success',
-            title: 'Evaluación Completada',
-            html: `
-                <div style="text-align: left;">
-                    <p>✅ <strong>Evaluación guardada exitosamente.</strong></p>
-                    <p>🔒 <strong>Sesión cerrada automáticamente.</strong></p>
-                    <p>🔄 <strong>Redirigiendo al inicio en 3 segundos...</strong></p>
-                </div>
-            `,
-            confirmButtonText: 'Ir al Inicio Ahora',
-            confirmButtonColor: '#3498db',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        // Redirigir al index.html
-        window.location.href = 'index.html';
+        // Mostrar mensaje simple en la página
+        showInlineSuccessMessage();
+        
+        // Redirigir inmediatamente después de un breve delay
+        setTimeout(() => {
+            console.log('🔄 Redirigiendo a index.html...');
+            window.location.href = 'index.html';
+        }, 1500); // Solo 1.5 segundos de delay
         
     } catch (error) {
         console.error('Error en cierre automático:', error);
-        // Redirigir de todas formas
         window.location.href = 'index.html';
+    }
+}
+
+// Función para mostrar mensaje en la página sin SweetAlert
+function showInlineSuccessMessage() {
+    const container = document.querySelector('.container');
+    if (container) {
+        const successDiv = document.createElement('div');
+        successDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #d4edda;
+            color: #155724;
+            padding: 2rem;
+            border: 2px solid #c3e6cb;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            min-width: 300px;
+        `;
+        successDiv.innerHTML = `
+            <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+            <h3 style="margin-bottom: 1rem; color: #155724;">Evaluación Completada</h3>
+            <p>Redirigiendo al inicio...</p>
+            <div style="margin-top: 1rem;">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+        `;
+        document.body.appendChild(successDiv);
+        
+        // Ocultar el resto del contenido
+        document.body.style.overflow = 'hidden';
+        const contentElements = document.querySelectorAll('.container, header, footer');
+        contentElements.forEach(el => {
+            el.style.opacity = '0.3';
+        });
     }
 }
 
