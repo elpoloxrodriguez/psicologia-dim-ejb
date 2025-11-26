@@ -1187,12 +1187,6 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
         
         console.log('Enviando datos al servidor...');
         
-        // BLOQUEAR INTERFAZ INMEDIATAMENTE
-        const calculateBtn = document.getElementById('calculate-btn');
-        calculateBtn.disabled = true;
-        calculateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-        calculateBtn.style.background = '#6c757d';
-        
         const response = await fetch('php/save-results.php', {
             method: 'POST',
             headers: {
@@ -1207,19 +1201,8 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
         if (result.success) {
             console.log('✅ Resultados guardados exitosamente');
             
-            // VERIFICAR SI EL PHP INDICA REDIRECCIÓN
-            if (result.redirect) {
-                console.log('🔄 Redirigiendo desde PHP a:', result.redirect_url);
-                // Mostrar mensaje rápido y redirigir
-                showQuickRedirectMessage();
-                setTimeout(() => {
-                    window.location.href = result.redirect_url;
-                }, 1000);
-            } else {
-                // Si no hay redirección automática desde PHP, usar método alternativo
-                console.log('⚠️ No hay redirección automática desde PHP');
-                await handleManualLogout();
-            }
+            // USAR LA VERSIÓN RÁPIDA
+            await handleAutomaticLogout();
             
             return result.result_id;
             
@@ -1227,9 +1210,12 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
             console.error('❌ Error guardando resultados:', result.message);
             
             // Re-habilitar el botón en caso de error
-            calculateBtn.disabled = false;
-            calculateBtn.innerHTML = 'Guardar Prueba';
-            calculateBtn.style.background = '#28a745';
+            const calculateBtn = document.getElementById('calculate-btn');
+            if (calculateBtn) {
+                calculateBtn.disabled = false;
+                calculateBtn.innerHTML = 'Guardar Prueba';
+                calculateBtn.style.background = '#28a745';
+            }
             
             Swal.fire({
                 icon: 'error',
@@ -1260,54 +1246,6 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
         });
         
         return false;
-    }
-}
-
-// Función para mostrar mensaje de redirección rápida
-function showQuickRedirectMessage() {
-    const messageDiv = document.createElement('div');
-    messageDiv.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.8);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-        color: white;
-        font-size: 1.5rem;
-        text-align: center;
-    `;
-    messageDiv.innerHTML = `
-        <div style="background: white; color: #333; padding: 2rem; border-radius: 10px;">
-            <div style="font-size: 3rem; color: #28a745;">✅</div>
-            <h3>Evaluación Completada</h3>
-            <p>Redirigiendo al inicio...</p>
-        </div>
-    `;
-    document.body.appendChild(messageDiv);
-}
-
-// Método alternativo si el PHP no redirige
-async function handleManualLogout() {
-    try {
-        // Cerrar sesión manualmente
-        const response = await fetch('php/logout-paciente.php');
-        const data = await response.json();
-        
-        if (data.success) {
-            showQuickRedirectMessage();
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1500);
-        } else {
-            window.location.href = 'index.html';
-        }
-    } catch (error) {
-        window.location.href = 'index.html';
     }
 }
 
