@@ -1,4 +1,4 @@
--- Tabla para almacenar los resultados del MCMI-III
+-- Tabla para almacenar los resultados del ICMM-III
 CREATE TABLE IF NOT EXISTS mcmi_results (
     id SERIAL PRIMARY KEY,
     patient_id INTEGER REFERENCES mcmi_patients(id),

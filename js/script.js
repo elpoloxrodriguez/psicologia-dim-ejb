@@ -1,11 +1,11 @@
-// MCMI-III - Inventario Clínico Multiaxial de Millon III
+// ICMM-III - Inventario Clínico Multiaxial de Millon III
 
 
 // Variables globales
 let responses = {};
 let answeredCount = 0;
 
-// 175 preguntas oficiales del MCMI-III
+// 175 preguntas oficiales del ICMM-III
 const questions = [
     { id: 1, question: "Últimamente parece que me quedo sin fuerzas, incluso por la mañana" },
     { id: 2, question: "Me parece muy bien que haya normas porque son una buena guía a seguir" },
@@ -184,7 +184,7 @@ const questions = [
     { id: 175, question: "A menudo me pierdo en mis pensamientos y me olvido de lo que está pasando a mi alrededor" }
 ];
 
-// Escalas del MCMI-III corregidas según los resultados del Excel
+// Escalas del ICMM-III corregidas según los resultados del Excel
 // Ejemplo de escalas (agrega todas las escalas reales y sus preguntas)
 const scales = {
     // Patrones clínicos de personalidad
@@ -223,7 +223,7 @@ const scales = {
     "X": { name: "Sinceridad", questions: [] }, // This is calculated as the sum of raw scores from personality scales
     "Y": { name: "Deseabilidad Social", questions: [21,33,36,41,52,58,60,70,81,83,89,98,105,113,124,138,142,149,152,173] },
     "Z": { name: "Devaluación", questions: [2,5,9,16,23,25,31,35,37,45,56,57,59,63,64,71,75,76,77,84,85,87,100,112,124,129,134,135,143,146,151,172] },
-    "V": { name: "Validez", questions: [66,111,158] } // Corrected based on standard MCMI-III V scale items
+    "V": { name: "Validez", questions: [66,111,158] } // Corrected based on standard ICMM-III V scale items
 };
 
 // Tablas de conversión corregidas según los resultados exactos del Excel
@@ -607,7 +607,7 @@ function displayResults(results) {
     const chartData = {
         labels: [],
         datasets: [{
-            label: 'PERFIL DE RESULTADOS GRAFICOS MCMI-III',
+            label: 'PERFIL DE RESULTADOS GRAFICOS ICMM-III',
             data: [],
             backgroundColor: [],
             borderColor: [],
@@ -618,7 +618,7 @@ function displayResults(results) {
     // Crear tabla de resultados
     let html = `
         <div style="margin-bottom: 20px;">
-            <h3 style="color:rgb(112, 127, 195); text-align: center;">Perfil de Resultados MCMI-III</h3>
+            <h3 style="color:rgb(112, 127, 195); text-align: center;">Perfil de Resultados ICMM-III</h3>
             <p style="text-align: center; color: #666; margin-bottom: 20px;">
                 <strong>Comparación con Excel:</strong> Los resultados deberían coincidir exactamente
             </p>
@@ -1154,7 +1154,7 @@ function setQuestionResponse(questionNumber, value, targetValue) {
 
 // Inicialización cuando se carga la página
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('Iniciando MCMI-III...');
+    console.log('Iniciando ICMM-III...');
     // Swal.fire("SweetAlert2 is working!");
 
     generateQuestions();
@@ -1165,7 +1165,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('calculate-btn').addEventListener('click', calculateResults);
     document.getElementById('clear-btn').addEventListener('click', clearAllResponses);
 
-    console.log('MCMI-III Evaluation Tool loaded successfully');
+    console.log('ICMM-III Evaluation Tool loaded successfully');
     console.log('Total questions:', questions.length);
     console.log('Total scales:', Object.keys(scales).length);
 

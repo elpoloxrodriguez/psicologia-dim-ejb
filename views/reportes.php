@@ -21,7 +21,7 @@ if ($resultId === 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte MCMI-III - Sistema de Evaluación</title>
+    <title>Reporte ICMM-III - Sistema de Evaluación</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -225,7 +225,7 @@ if ($resultId === 0) {
     <div class="report-container">
         <!-- Encabezado del Reporte -->
         <div class="report-header">
-            <h1><i class="fas fa-file-medical-alt"></i> Reporte MCMI-III</h1>
+            <h1><i class="fas fa-file-medical-alt"></i> Reporte ICMM-III</h1>
             <div class="patient-info" id="patient-info">
                 <div class="loading">
                     <i class="fas fa-spinner fa-spin"></i> Cargando información del paciente...
@@ -255,7 +255,7 @@ if ($resultId === 0) {
         const resultId = <?php echo $resultId; ?>;
 
 
-// 175 preguntas oficiales del MCMI-III
+// 175 preguntas oficiales del ICMM-III
 const questions = [
     { id: 1, question: "Últimamente parece que me quedo sin fuerzas, incluso por la mañana" },
     { id: 2, question: "Me parece muy bien que haya normas porque son una buena guía a seguir" },
@@ -434,7 +434,7 @@ const questions = [
     { id: 175, question: "A menudo me pierdo en mis pensamientos y me olvido de lo que está pasando a mi alrededor" }
 ];
 
-// Escalas del MCMI-III corregidas según los resultados del Excel
+// Escalas del ICMM-III corregidas según los resultados del Excel
 // Ejemplo de escalas (agrega todas las escalas reales y sus preguntas)
 const scales = {
     // Patrones clínicos de personalidad
@@ -473,7 +473,7 @@ const scales = {
     "X": { name: "Sinceridad", questions: [] }, // This is calculated as the sum of raw scores from personality scales
     "Y": { name: "Deseabilidad Social", questions: [21,33,36,41,52,58,60,70,81,83,89,98,105,113,124,138,142,149,152,173] },
     "Z": { name: "Devaluación", questions: [2,5,9,16,23,25,31,35,37,45,56,57,59,63,64,71,75,76,77,84,85,87,100,112,124,129,134,135,143,146,151,172] },
-    "V": { name: "Validez", questions: [66,111,158] } // Corrected based on standard MCMI-III V scale items
+    "V": { name: "Validez", questions: [66,111,158] } // Corrected based on standard ICMM-III V scale items
 };
 
 // Tablas de conversión corregidas según los resultados exactos del Excel

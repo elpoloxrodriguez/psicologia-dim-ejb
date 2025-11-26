@@ -1,11 +1,11 @@
-// MCMI-III - Inventario Clínico Multiaxial de Millon III
+// ICMM-III - Inventario Clínico Multiaxial de Millon III
 
 
 // Variables globales
 let responses = {};
 let answeredCount = 0;
 
-// 175 preguntas oficiales del MCMI-III
+// 175 preguntas oficiales del ICMM-III
 const questions = [
     { id: 1, question: "Últimamente parece que me quedo sin fuerzas, incluso por la mañana" },
     { id: 2, question: "Me parece muy bien que haya normas porque son una buena guía a seguir" },
@@ -184,7 +184,7 @@ const questions = [
     { id: 175, question: "A menudo me pierdo en mis pensamientos y me olvido de lo que está pasando a mi alrededor" }
 ];
 
-// Escalas del MCMI-III corregidas según los resultados del Excel
+// Escalas del ICMM-III corregidas según los resultados del Excel
 // Ejemplo de escalas (agrega todas las escalas reales y sus preguntas)
 const scales = {
     // Patrones clínicos de personalidad
@@ -223,7 +223,7 @@ const scales = {
     "X": { name: "Sinceridad", questions: [] }, // This is calculated as the sum of raw scores from personality scales
     "Y": { name: "Deseabilidad Social", questions: [21,33,36,41,52,58,60,70,81,83,89,98,105,113,124,138,142,149,152,173] },
     "Z": { name: "Devaluación", questions: [2,5,9,16,23,25,31,35,37,45,56,57,59,63,64,71,75,76,77,84,85,87,100,112,124,129,134,135,143,146,151,172] },
-    "V": { name: "Validez", questions: [66,111,158] } // Corrected based on standard MCMI-III V scale items
+    "V": { name: "Validez", questions: [66,111,158] } // Corrected based on standard ICMM-III V scale items
 };
 
 // Tablas de conversión corregidas según los resultados exactos del Excel
@@ -1123,7 +1123,7 @@ async function getEvaluationStatus() {
 
 // Modificar la función de inicialización
 document.addEventListener('DOMContentLoaded', async function () {
-    // console.log('Iniciando MCMI-III...');
+    // console.log('Iniciando ICMM-III...');
 
     // Primero verificar si ya completó la evaluación
     const isCompleted = await checkEvaluationStatus();
@@ -1138,7 +1138,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         document.getElementById('calculate-btn').addEventListener('click', calculateResults);
         document.getElementById('clear-btn').addEventListener('click', clearAllResponses);
 
-        // console.log('MCMI-III Evaluation Tool loaded successfully');
+        // console.log('ICMM-III Evaluation Tool loaded successfully');
         // console.log('Total questions:', questions.length);
         // console.log('Total scales:', Object.keys(scales).length);
     }
@@ -1187,6 +1187,12 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
         
         console.log('Enviando datos al servidor...');
         
+        // BLOQUEAR INTERFAZ INMEDIATAMENTE
+        const calculateBtn = document.getElementById('calculate-btn');
+        calculateBtn.disabled = true;
+        calculateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        calculateBtn.style.background = '#6c757d';
+        
         const response = await fetch('php/save-results.php', {
             method: 'POST',
             headers: {
@@ -1201,8 +1207,19 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
         if (result.success) {
             console.log('✅ Resultados guardados exitosamente');
             
-            // USAR LA VERSIÓN RÁPIDA
-            await handleAutomaticLogout();
+            // VERIFICAR SI EL PHP INDICA REDIRECCIÓN
+            if (result.redirect) {
+                console.log('🔄 Redirigiendo desde PHP a:', result.redirect_url);
+                // Mostrar mensaje rápido y redirigir
+                showQuickRedirectMessage();
+                setTimeout(() => {
+                    window.location.href = result.redirect_url;
+                }, 1000);
+            } else {
+                // Si no hay redirección automática desde PHP, usar método alternativo
+                console.log('⚠️ No hay redirección automática desde PHP');
+                await handleManualLogout();
+            }
             
             return result.result_id;
             
@@ -1210,12 +1227,9 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
             console.error('❌ Error guardando resultados:', result.message);
             
             // Re-habilitar el botón en caso de error
-            const calculateBtn = document.getElementById('calculate-btn');
-            if (calculateBtn) {
-                calculateBtn.disabled = false;
-                calculateBtn.innerHTML = 'Guardar Prueba';
-                calculateBtn.style.background = '#28a745';
-            }
+            calculateBtn.disabled = false;
+            calculateBtn.innerHTML = 'Guardar Prueba';
+            calculateBtn.style.background = '#28a745';
             
             Swal.fire({
                 icon: 'error',
@@ -1246,6 +1260,54 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
         });
         
         return false;
+    }
+}
+
+// Función para mostrar mensaje de redirección rápida
+function showQuickRedirectMessage() {
+    const messageDiv = document.createElement('div');
+    messageDiv.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        color: white;
+        font-size: 1.5rem;
+        text-align: center;
+    `;
+    messageDiv.innerHTML = `
+        <div style="background: white; color: #333; padding: 2rem; border-radius: 10px;">
+            <div style="font-size: 3rem; color: #28a745;">✅</div>
+            <h3>Evaluación Completada</h3>
+            <p>Redirigiendo al inicio...</p>
+        </div>
+    `;
+    document.body.appendChild(messageDiv);
+}
+
+// Método alternativo si el PHP no redirige
+async function handleManualLogout() {
+    try {
+        // Cerrar sesión manualmente
+        const response = await fetch('php/logout-paciente.php');
+        const data = await response.json();
+        
+        if (data.success) {
+            showQuickRedirectMessage();
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
+        } else {
+            window.location.href = 'index.html';
+        }
+    } catch (error) {
+        window.location.href = 'index.html';
     }
 }
 
@@ -1448,7 +1510,7 @@ function displayResults(results) {
     const chartData = {
         labels: [],
         datasets: [{
-            label: 'PERFIL DE RESULTADOS GRAFICOS MCMI-III',
+            label: 'PERFIL DE RESULTADOS GRAFICOS ICMM-III',
             data: [],
             backgroundColor: [],
             borderColor: [],
@@ -1459,7 +1521,7 @@ function displayResults(results) {
     // Crear tabla de resultados
     let html = `
         <div style="margin-bottom: 20px;">
-            <h3 style="color:rgb(112, 127, 195); text-align: center;">Perfil de Resultados MCMI-III</h3>
+            <h3 style="color:rgb(112, 127, 195); text-align: center;">Perfil de Resultados ICMM-III</h3>
             <p style="text-align: center; color: #666; margin-bottom: 20px;">
                 <strong>Comparación con Excel:</strong> Los resultados deberían coincidir exactamente
             </p>
@@ -1995,7 +2057,7 @@ function setQuestionResponse(questionNumber, value, targetValue) {
 
 // Inicialización cuando se carga la página
 document.addEventListener('DOMContentLoaded', function () {
-    // console.log('Iniciando MCMI-III...');
+    // console.log('Iniciando ICMM-III...');
 
     generateQuestions();
     addTestButton();
@@ -2005,7 +2067,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('calculate-btn').addEventListener('click', calculateResults);
     document.getElementById('clear-btn').addEventListener('click', clearAllResponses);
 
-    // console.log('MCMI-III Evaluation Tool loaded successfully');
+    // console.log('ICMM-III Evaluation Tool loaded successfully');
     // console.log('Total questions:', questions.length);
     // console.log('Total scales:', Object.keys(scales).length);
 

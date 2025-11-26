@@ -98,7 +98,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
 
         if (data.success) {
             showMessage('✓ ' + data.message, 'success');
-            // Redirigir al instrumento MCMI-III
+            // Redirigir al instrumento ICMM-III
             setTimeout(() => {
                 window.location.href = 'instrumento-mcmi.html';
             }, 1000);

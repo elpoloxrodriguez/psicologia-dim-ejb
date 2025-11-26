@@ -39,7 +39,7 @@ class ResultsManager {
             $responses = $data['responses'] ?? [];
             $interpretation = $data['interpretation'] ?? '';
             
-            // OBTENER EVALUATOR_ID VÁLIDO - CORREGIDO
+            // OBTENER EVALUATOR_ID VÁLIDO
             $evaluatorId = $this->getValidEvaluatorId($patientId);
             
             if ($evaluatorId === null) {
@@ -110,16 +110,16 @@ class ResultsManager {
                 $resultId = $stmt->fetch(PDO::FETCH_ASSOC)['id'];
                 error_log("Resultado guardado exitosamente con ID: " . $resultId);
                 
-                // NUEVO: Cerrar sesión del paciente automáticamente
-                $this->logoutPatient();
+                // CERRAR SESIÓN Y REDIRIGIR DESDE EL PHP
+                $this->logoutAndRedirect();
                 
+                // Este código no se ejecutará porque la redirección ya ocurrió
                 return [
                     'success' => true,
                     'message' => 'Resultados guardados exitosamente',
-                    'result_id' => $resultId,
-                    'logout_required' => true, // Nueva bandera
-                    'redirect_url' => 'index.html' // URL a redirigir
+                    'result_id' => $resultId
                 ];
+                
             } else {
                 $errorInfo = $stmt->errorInfo();
                 error_log("Error en execute: " . print_r($errorInfo, true));
@@ -139,20 +139,20 @@ class ResultsManager {
     }
     
     /**
-     * NUEVA FUNCIÓN: Cerrar sesión del paciente
+     * NUEVA FUNCIÓN: Cerrar sesión y redirigir inmediatamente
      */
-    private function logoutPatient() {
+    private function logoutAndRedirect() {
         try {
-            error_log("Cerrando sesión del paciente automáticamente...");
+            error_log("🔒 Cerrando sesión y redirigiendo...");
             
             // Limpiar todas las variables de sesión
             $_SESSION = array();
             
             // Destruir la sesión
             if (session_destroy()) {
-                error_log("Sesión cerrada exitosamente");
+                error_log("✅ Sesión cerrada exitosamente");
             } else {
-                error_log("Error al destruir la sesión");
+                error_log("❌ Error al destruir la sesión");
             }
             
             // También eliminar la cookie de sesión
@@ -164,13 +164,44 @@ class ResultsManager {
                 );
             }
             
+            // ENVIAR RESPUESTA JSON CON REDIRECCIÓN
+            $response = [
+                'success' => true,
+                'message' => 'Evaluación completada y sesión cerrada',
+                'redirect' => true,
+                'redirect_url' => 'index.html'
+            ];
+            
+            echo json_encode($response);
+            
+            // FORZAR EL FLUSH DEL BUFFER
+            if (ob_get_length()) {
+                ob_end_flush();
+            }
+            
+            flush();
+            
+            // TERMINAR LA EJECUCIÓN INMEDIATAMENTE
+            exit();
+            
         } catch (Exception $e) {
-            error_log("Error al cerrar sesión: " . $e->getMessage());
+            error_log("❌ Error al cerrar sesión: " . $e->getMessage());
+            
+            // En caso de error, igual redirigir
+            $response = [
+                'success' => true,
+                'message' => 'Evaluación completada',
+                'redirect' => true,
+                'redirect_url' => 'index.html'
+            ];
+            
+            echo json_encode($response);
+            exit();
         }
     }
     
     /**
-     * OBTENER EVALUATOR_ID VÁLIDO - CORREGIDO
+     * OBTENER EVALUATOR_ID VÁLIDO
      */
     private function getValidEvaluatorId($patientId) {
         // Estrategia 1: Buscar un usuario por defecto en mcmi_users
@@ -340,6 +371,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         switch ($input['action']) {
             case 'save':
                 $result = $resultsManager->saveResults($input);
+                // Si llegamos aquí, significa que NO se ejecutó la redirección automática
                 echo json_encode($result);
                 break;
             case 'get_evaluation_status':
