@@ -419,6 +419,37 @@
             color: #6c757d !important;
             border-color: #dee2e6 !important;
         }
+
+        /* Estilos para interfaz bloqueada */
+.interface-locked {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.interface-locked-message {
+    background: #fff3cd;
+    color: #856404;
+    padding: 1rem;
+    margin: 1rem 0;
+    border: 1px solid #ffeaa7;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.8; }
+    100% { opacity: 1; }
+}
+
+/* Estilos para botón deshabilitado */
+button:disabled {
+    background: #6c757d !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
     </style>
 </head>
 

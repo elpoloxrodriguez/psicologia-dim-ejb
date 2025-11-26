@@ -438,97 +438,226 @@ function interpolateValue(score, scaleId) {
 }
 
 // Función para calcular los resultados
+// Función para calcular los resultados
 async function calculateResults() {
     if (!validateResponses()) {
         alert('Por favor, complete todas las preguntas antes de calcular los resultados.');
         return;
     }
 
-    const results = {};
-    const rawScores = {};
+    // Deshabilitar el botón inmediatamente para evitar múltiples clics
+    const calculateBtn = document.getElementById('calculate-btn');
+    calculateBtn.disabled = true;
+    calculateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    calculateBtn.style.background = '#6c757d';
+    calculateBtn.style.cursor = 'not-allowed';
 
-    // 1) Calcular puntuaciones brutas para todas las escalas EXCEPTO X usando el mapeo de preguntas
-    for (const [scaleId, scaleData] of Object.entries(scales)) {
-        if (scaleId === 'X') continue; // X se calcula aparte como suma de escalas de personalidad
+    try {
+        const results = {};
+        const rawScores = {};
 
-        let rawScore = 0;
-        scaleData.questions.forEach(qNum => {
-            if (responses[qNum] === true) rawScore++;
+        // 1) Calcular puntuaciones brutas para todas las escalas EXCEPTO X usando el mapeo de preguntas
+        for (const [scaleId, scaleData] of Object.entries(scales)) {
+            if (scaleId === 'X') continue;
+
+            let rawScore = 0;
+            scaleData.questions.forEach(qNum => {
+                if (responses[qNum] === true) rawScore++;
+            });
+
+            // Regla especial para Narcisista (escala 5)
+            if (scaleId === '5') {
+                rawScore = Math.round((rawScore * 100) / 24);
+            }
+
+            const scaleTable = conversionTable[scaleId];
+            if (!scaleTable) {
+                console.error(`No se encontró tabla de conversión para la escala ${scaleId}`);
+                continue;
+            }
+
+            // Limitar al máximo definido en la tabla de conversión
+            const maxRaw = Math.max(...Object.keys(scaleTable).map(Number));
+            rawScore = Math.min(rawScore, maxRaw);
+            rawScores[scaleId] = rawScore;
+
+            // BR por tabla (con interpolación si no existe clave exacta)
+            let brScore = interpolateValue(rawScore, scaleId);
+            brScore = Math.max(0, Math.min(115, brScore));
+            const categoria = getCategoria(brScore);
+
+            results[scaleId] = {
+                name: scaleData.name,
+                rawScore,
+                brScore,
+                categoria
+            };
+        }
+
+        // 2) Calcular X como suma de brutos de las escalas de personalidad
+        const personalidadScales = ["1", "2A", "2B", "3", "4", "5", "6A", "6B", "7", "8A", "8B"];
+        let rawX = 0;
+        personalidadScales.forEach(sid => {
+            if (rawScores.hasOwnProperty(sid)) rawX += rawScores[sid];
         });
 
-        // Regla especial para Narcisista (escala 5)
-        if (scaleId === '5') {
-            rawScore = Math.round((rawScore * 100) / 24);
+        if (conversionTable["X"]) {
+            const maxRawX = Math.max(...Object.keys(conversionTable["X"]).map(Number));
+            rawX = Math.min(rawX, maxRawX);
+            let brX = interpolateValue(rawX, "X");
+            brX = Math.max(0, Math.min(115, brX));
+            const categoriaX = getCategoria(brX);
+
+            results["X"] = {
+                name: scales["X"].name,
+                rawScore: rawX,
+                brScore: brX,
+                categoria: categoriaX
+            };
         }
 
-        const scaleTable = conversionTable[scaleId];
-        if (!scaleTable) {
-            console.error(`No se encontró tabla de conversión para la escala ${scaleId}`);
-            continue;
+        // 3) Mostrar resultados
+        displayResults(results);
+        
+        // 4) Guardar en la base de datos
+        const elevatedScales = getElevatedScales(results);
+        const maxBR = getMaxBR(results);
+        const interpretation = `Escalas elevadas: ${elevatedScales.join(', ')}. BR máximo: ${maxBR}`;
+        
+        const resultId = await saveResultsToDatabase(results, responses, interpretation);
+        
+        if (resultId) {
+            await showSaveSuccessAndLogout(resultId);
+        } else {
+            showSaveError();
+            // Re-habilitar el botón en caso de error
+            calculateBtn.disabled = false;
+            calculateBtn.innerHTML = 'Guardar Prueba';
+            calculateBtn.style.background = '#28a745';
+            calculateBtn.style.cursor = 'pointer';
         }
+        
+        showGeneralInterpretation(results);
 
-        // Limitar al máximo definido en la tabla de conversión
-        const maxRaw = Math.max(...Object.keys(scaleTable).map(Number));
-        rawScore = Math.min(rawScore, maxRaw);
-        rawScores[scaleId] = rawScore;
-
-        // BR por tabla (con interpolación si no existe clave exacta)
-        let brScore = interpolateValue(rawScore, scaleId);
-        brScore = Math.max(0, Math.min(115, brScore));
-        const categoria = getCategoria(brScore);
-
-        results[scaleId] = {
-            name: scaleData.name,
-            rawScore,
-            brScore,
-            categoria
-        };
-        // console.log(`Escala ${scaleId} - Raw: ${rawScore}, BR: ${brScore}, Categoría: ${categoria}`);
+    } catch (error) {
+        console.error('Error al calcular resultados:', error);
+        // Re-habilitar el botón en caso de error
+        calculateBtn.disabled = false;
+        calculateBtn.innerHTML = 'Guardar Prueba';
+        calculateBtn.style.background = '#28a745';
+        calculateBtn.style.cursor = 'pointer';
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al procesar los resultados. Por favor, intente nuevamente.',
+            confirmButtonText: 'Aceptar'
+        });
     }
+}
 
-    // 2) Calcular X como suma de brutos de las escalas de personalidad
-    const personalidadScales = ["1", "2A", "2B", "3", "4", "5", "6A", "6B", "7", "8A", "8B"];
-    let rawX = 0;
-    personalidadScales.forEach(sid => {
-        if (rawScores.hasOwnProperty(sid)) rawX += rawScores[sid];
+
+// Función para mostrar éxito y cerrar sesión
+async function showSaveSuccessAndLogout(resultId) {
+    // Mostrar mensaje de éxito
+    const result = await Swal.fire({
+        icon: 'success',
+        title: 'Evaluación Completada',
+        html: `
+            <div style="text-align: left;">
+                <p>✅ <strong>Evaluación guardada exitosamente.</strong></p>
+                <p>🔒 Esta evaluación solo puede realizarse una vez.</p>
+                <p>🔄 <strong>Será redirigido automáticamente...</strong></p>
+            </div>
+        `,
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#3498db',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        timer: 5000, // 5 segundos
+        timerProgressBar: true,
+        didOpen: () => {
+            Swal.showLoading();
+        }
     });
 
-    if (conversionTable["X"]) {
-        const maxRawX = Math.max(...Object.keys(conversionTable["X"]).map(Number));
-        rawX = Math.min(rawX, maxRawX);
-        let brX = interpolateValue(rawX, "X");
-        brX = Math.max(0, Math.min(115, brX));
-        const categoriaX = getCategoria(brX);
+    // Cerrar sesión y redirigir
+    await logoutAndRedirect();
+}
 
-        results["X"] = {
-            name: scales["X"].name,
-            rawScore: rawX,
-            brScore: brX,
-            categoria: categoriaX
-        };
-        // console.log(`Escala X - Raw: ${rawX}, BR: ${brX}, Categoría: ${categoriaX}`);
-    } else {
-        console.error('No se encontró tabla de conversión para la escala X');
+// Función para cerrar sesión y redirigir
+async function logoutAndRedirect() {
+    try {
+        // Mostrar mensaje de cierre de sesión
+        Swal.fire({
+            title: 'Cerrando sesión...',
+            text: 'Redirigiendo al inicio',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Realizar logout
+        const response = await fetch('php/logout-paciente.php');
+        const data = await response.json();
+
+        // Esperar un momento para que el usuario vea el mensaje
+        setTimeout(() => {
+            // Redirigir al index.html
+            window.location.href = 'index.html';
+        }, 2000);
+
+    } catch (error) {
+        console.error('Error cerrando sesión:', error);
+        // Redirigir de todas formas
+        window.location.href = 'index.html';
+    }
+}
+
+
+// Función para bloquear toda la interfaz después de guardar
+function lockInterfaceAfterSave() {
+    // Deshabilitar todos los botones
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.disabled = true;
+        button.style.opacity = '0.6';
+        button.style.cursor = 'not-allowed';
+    });
+
+    // Deshabilitar todas las opciones de respuesta
+    const options = document.querySelectorAll('.option');
+    options.forEach(option => {
+        option.style.pointerEvents = 'none';
+        option.style.opacity = '0.5';
+        option.style.cursor = 'not-allowed';
+    });
+
+    // Mostrar mensaje de evaluación completada
+    const evaluationContainer = document.querySelector('.evaluation-container');
+    if (evaluationContainer) {
+        evaluationContainer.classList.add('disabled-evaluation');
     }
 
-    // 3) Mostrar resultados
-    // console.log('Resultados calculados:', results);
-    displayResults(results);
-    
-    // 4) Guardar en la base de datos
-    const elevatedScales = getElevatedScales(results);
-    const maxBR = getMaxBR(results);
-    const interpretation = `Escalas elevadas: ${elevatedScales.join(', ')}. BR máximo: ${maxBR}`;
-    
-    const resultId = await saveResultsToDatabase(results, responses, interpretation);
-    
-    if (resultId) {
-        showSaveSuccess(resultId);
-    } else {
-        showSaveError();
+    // Agregar mensaje visual
+    const header = document.querySelector('header');
+    if (header) {
+        const completedMessage = document.createElement('div');
+        completedMessage.style.cssText = `
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        `;
+        completedMessage.innerHTML = '✅ Evaluación Completada - No es posible realizar cambios';
+        header.parentNode.insertBefore(completedMessage, header.nextSibling);
     }
-    
-    showGeneralInterpretation(results);
 }
 
 // Función auxiliar para obtener escalas elevadas
@@ -1089,8 +1218,13 @@ async function saveResultsToDatabase(results, responses, interpretation = '') {
             //     allowOutsideClick: false,
             //     allowEscapeKey: false
             // });
+
+                // Bloquear la interfaz inmediatamente
+            lockInterfaceAfterSave();
             
             return result.result_id;
+
+            
             
         } else {
             console.error('Error guardando resultados:', result.message);
