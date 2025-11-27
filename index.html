@@ -294,13 +294,19 @@
 
         @media (max-width: 768px) {
             .logos-container {
-                flex-direction: column;
+                flex-direction: row;
                 gap: 15px;
                 margin-bottom: 20px;
+                justify-content: space-around;
             }
             
             .logo {
                 height: 60px;
+                margin: 0;
+            }
+            
+            .logo-left, .logo-right {
+                margin: 0;
             }
             
             .login-container {
@@ -324,6 +330,14 @@
             .security-features {
                 flex-direction: column;
                 gap: 10px;
+            }
+            
+            .logos-container {
+                padding: 0 10px;
+            }
+            
+            .logo {
+                height: 50px;
             }
         }
     </style>
@@ -440,7 +454,7 @@
                     setTimeout(() => {
                         // En un caso real, aquí redirigirías a la página principal
                         // window.location.href = 'dashboard.html';
-                        alert('Redirigiendo al panel de evaluación...');
+                        window.location.href = 'evaluacion.html'; // Cambia por la página a la que quieres redirigir
                     }, 1500);
                 }, 2000);
             } else {
