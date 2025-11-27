@@ -332,15 +332,15 @@
 <body>
     <!-- Logos en la parte superior -->
     <div class="logos-container">
-        <img src="https://cdn.pixabay.com/photo/2017/01/31/23/42/animal-2028258_1280.png" alt="Logo Ejército Bolivariano" class="logo logo-left">
-        <img src="https://cdn.pixabay.com/photo/2017/01/31/23/42/animal-2028258_1280.png" alt="Logo Evaluación Psicológica" class="logo logo-right">
+        <img src="./assets/ejb.webp" alt="Logo Ejército Bolivariano" class="logo logo-left">
+        <img src="./assets/dtic.webp" alt="Logo Evaluación Psicológica" class="logo logo-right">
     </div>
 
     <!-- Contenedor principal del login -->
     <div class="login-container">
         <div class="login-header">
             <h1>EJÉRCITO BOLIVARIANO</h1>
-            <h2>Evaluación Psicológica</h2>
+            <h2>Sistema de Psicológica</h2>
             <p>Ingrese sus credenciales para acceder</p>
         </div>
 
@@ -351,7 +351,7 @@
                 <label for="cedula">Cédula:</label>
                 <div class="input-with-icon">
                     <i class="fas fa-id-card"></i>
-                    <input type="text" id="cedula" autocomplete="off" name="cedula" required
+                    <input type="number" id="cedula" autocomplete="off" name="cedula" required
                         placeholder="Ingrese su número de cédula" maxlength="10">
                 </div>
                 <div class="error-text" id="cedulaError">La cédula debe contener solo números</div>
@@ -388,21 +388,6 @@
     <!-- Footer -->
     <div class="footer">
         <p>Diseñado por Dirección de Tecnología de la Información y las Comunicaciones del Ejército Bolivariano</p>
-        
-        <div class="security-features">
-            <div class="security-item">
-                <i class="fas fa-shield-alt"></i>
-                <span>Sistema Protegido</span>
-            </div>
-            <div class="security-item">
-                <i class="fas fa-user-shield"></i>
-                <span>Autenticación Segura</span>
-            </div>
-            <div class="security-item">
-                <i class="fas fa-lock"></i>
-                <span>Datos Encriptados</span>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -414,6 +399,7 @@
             const password = document.getElementById('password');
             const cedulaError = document.getElementById('cedulaError');
             const passwordError = document.getElementById('passwordError');
+            const messageContainer = document.getElementById('messageContainer');
             
             let isValid = true;
             
@@ -438,13 +424,30 @@
             }
             
             if (isValid) {
-                // Simular proceso de login
+                // Mostrar estado de carga
                 submitBtn.classList.add('loading');
                 
+                // Simular proceso de autenticación
                 setTimeout(() => {
                     submitBtn.classList.remove('loading');
-                    alert('Inicio de sesión exitoso (simulación)');
+                    
+                    // Mostrar mensaje de éxito
+                    messageContainer.textContent = 'Inicio de sesión exitoso. Redirigiendo...';
+                    messageContainer.className = 'message-container success-message';
+                    messageContainer.style.display = 'block';
+                    
+                    // Redirigir después de un breve tiempo
+                    setTimeout(() => {
+                        // En un caso real, aquí redirigirías a la página principal
+                        // window.location.href = 'dashboard.html';
+                        alert('Redirigiendo al panel de evaluación...');
+                    }, 1500);
                 }, 2000);
+            } else {
+                // Mostrar mensaje de error
+                messageContainer.textContent = 'Por favor, corrija los errores en el formulario.';
+                messageContainer.className = 'message-container error-message';
+                messageContainer.style.display = 'block';
             }
         });
         
