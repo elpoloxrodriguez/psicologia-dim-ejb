@@ -365,7 +365,7 @@
                 <label for="cedula">Cédula:</label>
                 <div class="input-with-icon">
                     <i class="fas fa-id-card"></i>
-                    <input type="number" id="cedula" autocomplete="off" name="cedula" required
+                    <input type="text" id="cedula" autocomplete="off" name="cedula" required
                         placeholder="Ingrese su número de cédula" maxlength="10">
                 </div>
                 <div class="error-text" id="cedulaError">La cédula debe contener solo números</div>
@@ -452,8 +452,8 @@
                     
                     // Redirigir después de un breve tiempo
                     setTimeout(() => {
-                        // En un caso real, aquí redirigirías a la página principal
-                        window.location.href = 'instrumento-mcmi.html'; // Cambia por la página a la que quieres redirigir
+                        // Aquí puedes cambiar por la página a la que quieres redirigir
+                        window.location.href = 'evaluacion.html';
                     }, 1500);
                 }, 2000);
             } else {
@@ -472,6 +472,8 @@
                 document.getElementById('cedulaError').style.display = 'none';
             } else {
                 this.classList.remove('valid');
+                this.classList.add('error');
+                document.getElementById('cedulaError').style.display = 'block';
             }
         });
         
@@ -482,6 +484,8 @@
                 document.getElementById('passwordError').style.display = 'none';
             } else {
                 this.classList.remove('valid');
+                this.classList.add('error');
+                document.getElementById('passwordError').style.display = 'block';
             }
         });
     </script>
