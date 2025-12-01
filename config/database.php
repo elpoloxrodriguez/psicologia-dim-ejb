@@ -13,7 +13,7 @@ class Database {
             $this->conn = new PDO($dsn, $this->username, $this->password);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            echo "Conexión exitosa a PostgreSQL";
+            // echo "Conexión exitosa a PostgreSQL";
         } catch(PDOException $e) {
             error_log("Error de conexión a PostgreSQL: " . $e->getMessage());
             throw new Exception("Error de conexión a la base de datos");
