@@ -78,7 +78,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
     submitBtn.disabled = true;
 
     try {
-        const response = await fetch('php/login-pacientes.php', {
+        const response = await fetch('./php/login-pacientes.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -1,10 +1,10 @@
 <?php
 header('Content-Type: application/json');
-session_start();
+// session_start();
 
 // Para debugging - mostrar errores (quitar en producción)
-error_reporting(E_ALL);
-ini_set('display_errors', 0);
+// error_reporting(E_ALL);
+// ini_set('display_errors', 0);
 
 try {
     require_once '../config/database.php';
