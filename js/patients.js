@@ -119,7 +119,7 @@ function filterPatients() {
 // Abrir modal para nuevo paciente
 function openPatientModal() {
     currentEditId = null;
-    document.getElementById('modalTitle').textContent = 'Nuevo Paciente';
+    document.getElementById('modalTitle').textContent = 'Nuevo Entrevistado';
     document.getElementById('patientForm').reset();
     document.getElementById('patientModal').style.display = 'block';
 }
@@ -140,7 +140,7 @@ async function editPatient(id) {
             const patient = data.patient;
             currentEditId = id;
             
-            document.getElementById('modalTitle').textContent = 'Editar Paciente';
+            document.getElementById('modalTitle').textContent = 'Editar Entrevistado';
             document.getElementById('patientId').value = patient.id;
             document.getElementById('cedula').value = patient.cedula;
             document.getElementById('nombres').value = patient.nombres;

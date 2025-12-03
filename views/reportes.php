@@ -1135,7 +1135,7 @@ if ($resultId === 0) {
             const patientInfo = document.getElementById('patient-info');
             patientInfo.innerHTML = `
                 <div class="info-item">
-                    <strong>Paciente</strong>
+                    <strong>Entrevistado</strong>
                     ${patient.nombres} ${patient.apellidos}
                 </div>
                 <div class="info-item">

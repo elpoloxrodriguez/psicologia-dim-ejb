@@ -54,7 +54,7 @@
                     <thead>
                         <tr>
                             <th>Fecha</th>
-                            <th>Paciente</th>
+                            <th>Entrevistado</th>
                             <th>Cédula</th>
                             <th>Evaluador</th>
                             <th>Estado</th>

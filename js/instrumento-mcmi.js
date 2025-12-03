@@ -751,7 +751,7 @@ async function getPatientIdFromSession() {
         console.log('📊 Respuesta de sesión:', data);
         
         if (data.success && data.logged_in && data.patient) {
-            console.log('✅ Paciente encontrado:', data.patient);
+            console.log('✅ Entrevistado encontrado:', data.patient);
             return data.patient.id;
         } else {
             console.warn('❌ No se encontró sesión de paciente válida:', data.message || 'Sin mensaje');

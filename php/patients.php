@@ -71,7 +71,7 @@ class PatientManager {
             } else {
                 return [
                     'success' => false,
-                    'message' => 'Paciente no encontrado'
+                    'message' => 'Entrevistado no encontrado'
                 ];
             }
             
@@ -147,7 +147,7 @@ class PatientManager {
             if ($stmt->execute()) {
                 return [
                     'success' => true,
-                    'message' => 'Paciente creado exitosamente'
+                    'message' => 'Entrevistado creado exitosamente'
                 ];
             } else {
                 return [
@@ -226,7 +226,7 @@ class PatientManager {
             if ($stmt->execute()) {
                 return [
                     'success' => true,
-                    'message' => 'Paciente actualizado exitosamente'
+                    'message' => 'Entrevistado actualizado exitosamente'
                 ];
             } else {
                 return [
@@ -254,7 +254,7 @@ class PatientManager {
             if ($stmt->execute()) {
                 return [
                     'success' => true,
-                    'message' => 'Paciente eliminado exitosamente'
+                    'message' => 'Entrevistado eliminado exitosamente'
                 ];
             } else {
                 return [

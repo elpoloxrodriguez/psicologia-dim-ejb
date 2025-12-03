@@ -56,7 +56,7 @@ try {
         }
     } else {
         $response['success'] = true; // Éxito en la verificación, pero no logueado
-        $response['message'] = 'Paciente no logueado';
+        $response['message'] = 'Entrevistado no logueado';
     }
 
     echo json_encode($response);

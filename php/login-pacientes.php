@@ -68,7 +68,7 @@ class PatientAuth {
             } else {
                 return [
                     'success' => false,
-                    'message' => 'Paciente no encontrado o inactivo'
+                    'message' => 'Entrevistado no encontrado o inactivo'
                 ];
             }
             
