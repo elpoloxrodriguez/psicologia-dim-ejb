@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-// session_start();
+session_start();
 
 // Para debugging - mostrar errores (quitar en producción)
 // error_reporting(E_ALL);
