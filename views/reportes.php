@@ -1194,14 +1194,20 @@ if ($resultId === 0) {
                     
                     <!-- Gráfico -->
                     <div class="chart-container">
-                        <h3 style="text-align: center; color: #2c3e50; margin-bottom: 20px;">
-                            <i class="fas fa-chart-bar"></i> Perfil de Resultados
-                        </h3>
-                        <canvas id="resultsChart" height="400"></canvas>
-                        <button class="btn-primary" style="margin: 20px auto; display: block;" onclick="downloadPDF()">
+                    <h3 style="text-align: center; color: #2c3e50; margin-bottom: 20px;">
+                        <i class="fas fa-chart-bar"></i> Perfil de Resultados
+                    </h3>
+                    <canvas id="resultsChart" height="400"></canvas>
+                    
+                    <div class="button-container" style="display: flex; gap: 15px; justify-content: center; margin: 20px 0; flex-wrap: wrap;">
+                        <button class="btn-primary" onclick="downloadPDF()">
                             <i class="fas fa-file-pdf"></i> Observaciones Clínicas
                         </button>
+                        <button class="btn-primary" onclick="downloadManual()">
+                            <i class="fas fa-book"></i> Manual MCMM-III
+                        </button>
                     </div>
+                </div>
                 </div>
                 
                 <!-- Interpretación -->
@@ -1556,6 +1562,69 @@ if ($resultId === 0) {
         function printReport() {
             window.print();
         }
+
+/**
+ * Descarga el manual MCMM-III en formato PDF
+ * Usa ruta completa para mayor confiabilidad
+ */
+function downloadManual() {
+    // Construir URL completa del PDF
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    const pdfPath = '/assets/pdf/inventario-clinico-multiaxial-de-millon-iii-mcmi-iii-th-millon-davis-y-c-millon.pdf';
+    const fullPdfUrl = `${protocol}//${host}${pdfPath}`;
+    
+    // Nombre amigable para el archivo descargado
+    const downloadName = 'Manual-MCMM-III-Inventario-Clinico-Multiaxial-de-Millon.pdf';
+    
+    
+    // Método 1: Usando la API de descarga (recomendado)
+    const downloadLink = document.createElement('a');
+    downloadLink.href = fullPdfUrl;
+    downloadLink.download = downloadName;
+    downloadLink.type = 'application/pdf';
+    
+    // Configuraciones adicionales
+    downloadLink.setAttribute('target', '_blank');
+    downloadLink.setAttribute('rel', 'noopener noreferrer');
+    
+    // Agregar temporalmente al documento
+    document.body.appendChild(downloadLink);
+    
+    // Disparar el evento de clic
+    const clickEvent = new MouseEvent('click', {
+        view: window,
+        bubbles: true,
+        cancelable: true
+    });
+    
+    let downloadSuccess = false;
+    
+    try {
+        downloadLink.dispatchEvent(clickEvent);
+        downloadSuccess = true;
+        console.log('✅ Descarga iniciada con éxito');
+    } catch (error) {
+        console.warn('⚠️ No se pudo iniciar descarga automática:', error);
+        console.log('🔄 Intentando método alternativo...');
+        
+        // Método alternativo: abrir en nueva pestaña
+        window.open(fullPdfUrl, '_blank');
+    }
+    
+    // Limpiar después de un breve tiempo
+    setTimeout(() => {
+        if (downloadLink.parentNode) {
+            document.body.removeChild(downloadLink);
+        }
+    }, 1000);
+    
+    console.groupEnd();
+    
+    // Retornar estado para posibles verificaciones
+    return downloadSuccess;
+}
+
         
         document.addEventListener('DOMContentLoaded', loadReport);
     </script>

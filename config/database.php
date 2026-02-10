@@ -2,8 +2,8 @@
 class Database {
     private $host = 'localhost';
     private $db_name = 'psicologia';
-    private $username = 'elpoloxrodriguez';
-    private $password = 'Arrd17818665';
+    private $username = 'psicologia';
+    private $password = 'psicologia';
     private $conn;
     
     public function connect() {
