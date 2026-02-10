@@ -766,7 +766,16 @@ if ($resultId === 0) {
                     <h4>Relaciones Interpersonales</h4>
                     <p>Esta desconfianza generalizada dificulta enormemente la formación de relaciones cercanas y de confianza, generando un círculo vicioso donde su suspicacia genera rechazo que confirma sus sospechas.</p>
                 `
-            }
+            },
+            "A": {
+                title: "Trastornos de Ansiedad (Escala A)",
+                content: ``
+            },
+            "H": {
+                title: "Trastorno Somatoformo (Escala H)",
+                content: ``
+            },
+                
         };
         
         // Función para abrir el modal con información de la escala
@@ -1189,6 +1198,9 @@ if ($resultId === 0) {
                             <i class="fas fa-chart-bar"></i> Perfil de Resultados
                         </h3>
                         <canvas id="resultsChart" height="400"></canvas>
+                        <button class="btn-primary" style="margin: 20px auto; display: block;" onclick="downloadPDF()">
+                            <i class="fas fa-file-pdf"></i> Observaciones Clínicas
+                        </button>
                     </div>
                 </div>
                 
@@ -1270,7 +1282,22 @@ if ($resultId === 0) {
                 { id: '8B', name: 'Autodestructivo', dbId: '8b' },
                 { id: 'S', name: 'Esquizotípico', dbId: 's' },
                 { id: 'C', name: 'Borderline', dbId: 'c' },
-                { id: 'P', name: 'Paranoide', dbId: 'p' }
+                { id: 'P', name: 'Paranoide', dbId: 'p' },
+                { id: 'A', name: 'Trastornos de Ansiedad', dbId: 'a' },
+                { id: 'H', name: 'Trastorno Somatoformo', dbId: 'h' },
+                { id: 'N', name: 'Trastorno Bipolar', dbId: 'n' },
+                { id: 'D', name: 'Trastorno Distímico', dbId: 'd' },
+                { id: 'B', name: 'Dependencia del alcohol', dbId: 'b' },
+                { id: 'T', name: 'Dependencia de sustancias', dbId: 't' },
+                { id: 'R', name: 'Trastorno estrés postraumático', dbId: 'r' },
+                { id: 'SS', name: 'Desorden del pensamiento', dbId: 'ss' },
+                { id: 'CC', name: 'Depresión mayor', dbId: 'cc' },
+                { id: 'PP', name: 'Desorden delusional', dbId: 'pp' },
+                { id: 'X', name: 'Sinceridad', dbId: 'x' },
+                { id: 'Y', name: 'Deseabilidad Social', dbId: 'y' },
+                { id: 'Z', name: 'Devaluación', dbId: 'z' },
+                { id: 'V', name: 'Validez', dbId: 'v' }
+
             ];
             
             return scales.map(scale => {
@@ -1431,7 +1458,21 @@ if ($resultId === 0) {
                 { id: '8B', dbId: '8b', name: 'Autodestructivo' },
                 { id: 'S', dbId: 's', name: 'Esquizotípico' },
                 { id: 'C', dbId: 'c', name: 'Borderline' },
-                { id: 'P', dbId: 'p', name: 'Paranoide' }
+                { id: 'P', dbId: 'p', name: 'Paranoide' },
+                { id: 'A', dbId: 'a', name: 'Trastornos de Ansiedad' },
+                { id: 'H', dbId: 'h', name: 'Trastorno Somatoformo' },
+                { id: 'N', dbId: 'n', name: 'Trastorno Bipolar' },
+                { id: 'D', dbId: 'd', name: 'Trastorno Distímico' },
+                { id: 'B', dbId: 'b', name: 'Dependencia del alcohol' },
+                { id: 'T', dbId: 't', name: 'Dependencia de sustancias' },
+                { id: 'R', dbId: 'r', name: 'Trastorno estrés postraumático' },
+                { id: 'SS', dbId: 'ss', name: 'Desorden del pensamiento' },
+                { id: 'CC', dbId: 'cc', name: 'Depresión mayor' },
+                { id: 'PP', dbId: 'pp', name: 'Desorden delusional' },
+                { id: 'X', dbId: 'x', name: 'Sinceridad' },
+                { id: 'Y', dbId: 'y', name: 'Deseabilidad Social' },
+                { id: 'Z', dbId: 'z', name: 'Devaluación' },
+                { id: 'V', dbId: 'v', name: 'Validez' }
             ];
             
             const labels = scales.map(scale => scale.id);
