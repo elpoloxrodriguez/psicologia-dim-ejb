@@ -1,9 +1,13 @@
 <?php
 class Database {
-    private $host = 'localhost';
+    private $host = '10.110.100.12';
     private $db_name = 'psicologia';
     private $username = 'psicologia';
     private $password = 'psicologia';
+    // private $host = 'localhost';
+    // private $db_name = 'psicologia';
+    // private $username = 'elpoloxrodriguez';
+    // private $password = 'Arrd17818665';
     private $conn;
     
     public function connect() {
